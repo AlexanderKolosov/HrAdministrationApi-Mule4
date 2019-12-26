@@ -26,7 +26,13 @@
 				<version>${mule.maven.plugin.version}</version>
 				<extensions>true</extensions>
 				<configuration>
-				</configuration>
+				<sharedLibraries>
+                        <sharedLibrary>
+                            <groupId>org.postgresql</groupId>
+                            <artifactId>postgresql</artifactId>
+                        </sharedLibrary>
+                    </sharedLibraries>
+                </configuration>
 			</plugin>
 		<plugin>
                 <groupId>com.mulesoft.munit.tools</groupId>
@@ -85,6 +91,17 @@
             <version>2.2.1</version>
             <classifier>mule-plugin</classifier>
             <scope>test</scope>
+        </dependency>
+    	<dependency>
+            <groupId>org.mule.connectors</groupId>
+            <artifactId>mule-db-connector</artifactId>
+            <version>1.5.5</version>
+            <classifier>mule-plugin</classifier>
+        </dependency>
+    	<dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.2.9.jre7</version>
         </dependency>
     </dependencies>
 

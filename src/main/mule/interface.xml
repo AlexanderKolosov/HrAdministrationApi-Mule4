@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd ">
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
     <http:listener-config name="human-resources-api-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
-    <apikit:config name="human-resources-api-config" api="human-resources-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="human-resources-api-config" api="human-resources-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus"/>
     <flow name="human-resources-api-main">
-        <http:listener config-ref="human-resources-api-httpListenerConfig" path="/api/*" allowedMethods="GET, POST, PUT, DELETE">
+        <http:listener config-ref="human-resources-api-httpListenerConfig" path="/api/*" allowedMethods="GET, POST, PUT, DELETE" outputMimeType="application/json">
             <http:response statusCode="#[vars.httpStatus default 200]">
                 <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:response>
@@ -69,7 +71,7 @@ output application/json
                 </ee:transform>
             </on-error-propagate>
             <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="b06a0438-d3aa-4654-b1c7-d604be8ea0ba">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -77,7 +79,7 @@ output application/json
 {message: "Unsupported media type"}]]></ee:set-payload>
                     </ee:message>
                     <ee:variables>
-                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[415]]></ee:set-variable>
                     </ee:variables>
                 </ee:transform>
             </on-error-propagate>
@@ -124,670 +126,155 @@ output application/json
         </error-handler>
     </flow>
     <flow name="put:\companies\(company_id):application\json:human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="company_id">attributes.uriParams.'company_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "The company 'company_name' was modified successfully"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="b624ada2-7a73-474c-a1da-7d89eff82765" message="The api entered in the put:\companies\{company_id} flow."/>
+		<set-variable value="#[attributes.uriParams.company_id]" doc:name="companyId" doc:id="20cecfe5-a793-412a-a9c6-a45b432c335c" variableName="companyId" mimeType="application/json"/>
+		<flow-ref doc:name="putCompanyByIdFlow" doc:id="f78b4af1-4065-44a6-96ed-40cd329f2500" name="putCompanyByIdFlow"/>
     </flow>
-    <flow name="put:\departments\(department_id):application\json:human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="department_id">attributes.uriParams.'department_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "The department 'department_name' was modified successfully"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+	<flow name="put:\departments\(department_id):application\json:human-resources-api-config">
+		<logger level="INFO" doc:name="Logger" doc:id="2bd62f0a-870c-43b7-bac0-707e9ad281ed" message="The api entered in the put:\departments\{department_id} flow."/>
+		<set-variable value="#[attributes.uriParams.department_id]" doc:name="departmentId" doc:id="abc98d40-3367-4213-899c-36e20199601b" variableName="departmentId"/>
+		<flow-ref doc:name="putDepartmentByIdFlow" doc:id="63bfb4eb-5cd4-4182-b9cd-e6dd3adb630a" name="putDepartmentByIdFlow"/>
     </flow>
-    <flow name="put:\employees\(employee_id):application\json:human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="employee_id">attributes.uriParams.'employee_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "The employee 'employee_name' was modified successfully"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+	<flow name="put:\employees\(employee_id):application\json:human-resources-api-config">
+		<logger level="INFO" doc:name="Logger" doc:id="8506972e-955d-4776-b9aa-6bdbb864c99c" message="The api entered in the put:\employees\{employee_id} flow."/>
+		<set-variable value="#[attributes.uriParams.employee_id as Number]" doc:name="employeeId" doc:id="116fc7fe-f0d7-4b83-adc6-a8d5ffda6efd" variableName="employeeId"/>
+		<flow-ref doc:name="putEmployeeByIdFlow" doc:id="8264a6f6-41db-48b2-9ab5-53ba2898e56f" name="putEmployeeByIdFlow"/>
     </flow>
     <flow name="put:\vacations\(vacation_id):application\json:human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="vacation_id">attributes.uriParams.'vacation_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "The vacation was modified successfully"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="045ae58e-694c-44e2-bf3b-ecb67e82f0b2" message="The api entered in the put:\vacations\{vacation_id} flow."/>
+		<set-variable value="#[attributes.uriParams.vacation_id]" doc:name="vacationId" doc:id="c6d9fed1-7e5d-439f-b09d-0361c54533ab" variableName="vacationId"/>
+		<flow-ref doc:name="putVacationByIdFlow" doc:id="1ce46514-690e-47fb-bbb9-65e929286f3a" name="putVacationByIdFlow"/>
     </flow>
     <flow name="delete:\companies\(company_id):human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="company_id">attributes.uriParams.'company_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "The company 'company_name' was deleted successfully"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="1cfd582d-5408-4ab1-8101-b2fd4914bb0e" message="The api entered in the delete:\companies\{company_id} flow."/>
+		<set-variable value="#[attributes.uriParams.company_id]" doc:name="companyId" doc:id="07ce4277-e209-4da7-8ad9-e459159aab71" variableName="companyId"/>
+		<flow-ref doc:name="deleteCompanyByIdFlow" doc:id="fe8f0d06-12c0-4e7e-a6be-0c9c4f217664" name="deleteCompanyByIdFlow"/>
     </flow>
     <flow name="delete:\departments\(department_id):human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="department_id">attributes.uriParams.'department_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "The department 'department_name' was deleted successfully"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="225f3528-c64c-407f-ab8a-e49aee4ce3fe" message="The api entered in the delete:\departments\{department_id} flow."/>
+		<set-variable value="#[attributes.uriParams.department_id]" doc:name="departmentId" doc:id="5e4c760e-279b-4c64-93c9-3aa0214b9d93" variableName="departmentId"/>
+		<flow-ref doc:name="deleteDepartmentByIdFlow" doc:id="e4606c0e-ba4a-4050-a691-1c355e6fed2e" name="deleteDepartmentByIdFlow"/>
     </flow>
     <flow name="delete:\employees\(employee_id):human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="employee_id">attributes.uriParams.'employee_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "The employee 'employee_name' was deleted successfully"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="61151e7d-eda7-40f3-b655-0b4306ad6ed8" message="The api entered in the delete:\employees\{employee_id} flow."/>
+		<set-variable value="#[attributes.uriParams.employee_id]" doc:name="employeeId" doc:id="cc8b97a5-7afa-4ec7-963c-5b536c74db49" variableName="employeeId"/>
+		<flow-ref doc:name="deleteEmployeeByIdFlow" doc:id="b1783f86-ad2d-4f90-95f3-49ca1712c750" name="deleteEmployeeByIdFlow"/>
     </flow>
     <flow name="delete:\vacations\(vacation_id):human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="vacation_id">attributes.uriParams.'vacation_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "The vacation was deleted successfully"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="5f576d86-9062-468b-8509-8afb532d88cb" message="The api entered in the delete:\vacations\{vacation_id} flow."/>
+		<set-variable value="#[attributes.uriParams.vacation_id]" doc:name="vacationId" doc:id="f94a8437-b80e-4d85-a32b-c9275321a25a" variableName="vacationId"/>
+		<flow-ref doc:name="deleteVacationByIdFlow" doc:id="4c9b0870-45a7-478c-829c-b79809d46e8f" name="deleteVacationByIdFlow"/>
     </flow>
     <flow name="get:\companies:human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-[
-  {
-    id: 1,
-    name: "First Company"
-  }, 
-  {
-    id: 2,
-    name: "Second Company"
-  }
-]]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="1425f467-df9c-494a-985e-8f81a93f690b" message="The api entered in the get:\companies flow."/>
+		<flow-ref doc:name="getCompaniesFlow" doc:id="85bb8c26-91bd-40c3-ac6d-86c444b04a2b" name="getCompaniesFlow"/>
     </flow>
     <flow name="get:\vacations\companies\(company_id):human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="company_id">attributes.uriParams.'company_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-[
-  {
-    id: 1,
-    employeeId: 9,
-    companyId: 2,
-    departmentId: 3,
-    startDate: "2020-05-23",
-    periodOfDays: 25,
-    status: "In process"
-  }, 
-  {
-    id: 1,
-    employeeId: 10,
-    companyId: 2,
-    departmentId: 3,
-    startDate: "2020-06-23",
-    periodOfDays: 15,
-    status: "In process"
-  }
-]]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="a620d7aa-3f47-402c-8296-82487eff1b67" message="The api entered in the get:\vacations\companies\{company_id} flow."/>
+		<set-variable value="#[attributes.uriParams.company_id]" doc:name="companyId" doc:id="70334422-97e5-440f-88ff-52d5a06e7817" variableName="companyId"/>
+		<flow-ref doc:name="getVacationByCompanyIdFlow" doc:id="b98312e4-ea41-4d98-bd19-dc0921197d04" name="getVacationByCompanyIdFlow"/>
     </flow>
     <flow name="get:\departments\companies\(company_id):human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="company_id">attributes.uriParams.'company_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-[
-  {
-    id: 1,
-    name: "First Department",
-    companyId: 1
-  }, 
-  {
-    id: 2,
-    name: "Second Department",
-    companyId: 1
-  }
-]]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="21dbda3f-056d-4cc1-9e47-954ba2c0b08b" message="The api entered in the get:\departments\companies\{company_id} flow."/>
+		<set-variable value="#[attributes.uriParams.company_id]" doc:name="companyId" doc:id="64d651c3-ff4c-42f3-a851-fe4645bad0b9" variableName="companyId"/>
+		<flow-ref doc:name="getDepartmentByCompanyIdFlow" doc:id="2825ce34-d471-480e-95e1-ffe65e002439" name="getDepartmentByCompanyIdFlow"/>
     </flow>
     <flow name="get:\employees\companies\(company_id):human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="company_id">attributes.uriParams.'company_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-[
-  {
-    id: 9,
-    firstName: "Alexander",
-    lastName: "Kolosov",
-    companyId: 2,
-    departmentId: 1,
-    position: "java developer"
-  }, 
-  {
-    id: 5,
-    firstName: "John",
-    lastName: "Snow",
-    companyId: 2,
-    departmentId: 1,
-    position: "warrior"
-  }
-]]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="94b013d5-cc2e-4453-98ab-adcd6403c077" message="The api entered in the get:\employees\companies\{company_id} flow."/>
+		<set-variable value="#[attributes.uriParams.company_id]" doc:name="companyId" doc:id="926bf0ed-608e-47f0-9cf7-84713211f3dc" variableName="companyId"/>
+		<flow-ref doc:name="getEmployeeByCompanyIdFlow" doc:id="1e38c347-6a1f-477a-ab43-59c32e011db7" name="getEmployeeByCompanyIdFlow"/>
     </flow>
     <flow name="get:\departments:human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-[
-  {
-    id: 1,
-    name: "First Department",
-    companyId: 1
-  }, 
-  {
-    id: 2,
-    name: "Second Department",
-    companyId: 1
-  }
-]]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="dfebfe9b-caad-4e42-afc1-998fcd1a5904" message="The api entered in the get:\departments flow."/>
+		<flow-ref doc:name="getDepartmentsFlow" doc:id="a57a8aa5-9af6-4b2e-977d-a6324e4a8043" name="getDepartmentsFlow"/>
     </flow>
     <flow name="get:\employees\departments\(department_id):human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="department_id">attributes.uriParams.'department_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-[
-  {
-    id: 9,
-    firstName: "Alexander",
-    lastName: "Kolosov",
-    companyId: 2,
-    departmentId: 1,
-    position: "java developer"
-  }, 
-  {
-    id: 5,
-    firstName: "John",
-    lastName: "Snow",
-    companyId: 2,
-    departmentId: 1,
-    position: "warrior"
-  }
-]]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="851db53e-217d-484c-95f5-c3093c6bcca5" message="The api entered in the get:\employees\departments\{department_id} flow."/>
+		<set-variable value="#[attributes.uriParams.department_id]" doc:name="departmentId" doc:id="4ec89c95-4072-4161-af1c-1866c1da9ab6" variableName="departmentId"/>
+		<flow-ref doc:name="getEmployeesByDepartmentIdFlow" doc:id="10fb394c-1abe-42e4-8b06-6c608022694b" name="getEmployeesByDepartmentIdFlow"/>
     </flow>
     <flow name="get:\vacations\departments\(department_id):human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="department_id">attributes.uriParams.'department_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-[
-  {
-    id: 1,
-    employeeId: 9,
-    companyId: 2,
-    departmentId: 3,
-    startDate: "2020-05-23",
-    periodOfDays: 25,
-    status: "In process"
-  }, 
-  {
-    id: 1,
-    employeeId: 10,
-    companyId: 2,
-    departmentId: 3,
-    startDate: "2020-06-23",
-    periodOfDays: 15,
-    status: "In process"
-  }
-]]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="19aa397d-362d-4187-a41f-1f9ce6dfc534" message="The api entered in the get:\vacations\departments\{department_id} flow."/>
+		<set-variable value="#[attributes.uriParams.department_id]" doc:name="departmentId" doc:id="e0bf4b22-80bc-48d7-80d3-5b55e648e851" variableName="departmentId"/>
+		<flow-ref doc:name="getVacationsByDepartmentIdFlow" doc:id="9e2667da-4035-40eb-8f60-ede5c63cb3ec" name="getVacationsByDepartmentIdFlow"/>
     </flow>
     <flow name="get:\employees:human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-[
-  {
-    id: 9,
-    firstName: "Alexander",
-    lastName: "Kolosov",
-    companyId: 2,
-    departmentId: 1,
-    position: "java developer"
-  }, 
-  {
-    id: 5,
-    firstName: "John",
-    lastName: "Snow",
-    companyId: 2,
-    departmentId: 1,
-    position: "warrior"
-  }
-]]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="b12ef88d-f7cd-4aa2-9d65-354cfe9b7594" message="The api entered in the get:\employees flow."/>
+		<flow-ref doc:name="Flow Reference" doc:id="edc42adf-3b4a-4505-9bf0-ef76cf5851c5" name="getEmployeesFlow"/>
     </flow>
     <flow name="get:\vacations\employees\(employee_id):human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="employee_id">attributes.uriParams.'employee_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-[
-  {
-    id: 1,
-    employeeId: 9,
-    companyId: 2,
-    departmentId: 3,
-    startDate: "2020-05-23",
-    periodOfDays: 25,
-    status: "In process"
-  }, 
-  {
-    id: 1,
-    employeeId: 10,
-    companyId: 2,
-    departmentId: 3,
-    startDate: "2020-06-23",
-    periodOfDays: 15,
-    status: "In process"
-  }
-]]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="eaa98ad8-6188-4391-b2aa-98a63574255d" message="The api entered in the get:\vacations\employees\{employee_id} flow."/>
+		<set-variable value="#[attributes.uriParams.employee_id as Number]" doc:name="employeeId" doc:id="6a1349b6-e955-499c-a492-519472e82a65" variableName="employeeId"/>
+		<flow-ref doc:name="getVacationsByEmployeeIdFlow" doc:id="7f22752f-f2ab-440c-a5fc-c04542434f46" name="getVacationsByEmployeeIdFlow"/>
     </flow>
     <flow name="get:\vacations:human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-[
-  {
-    id: 1,
-    employeeId: 9,
-    companyId: 2,
-    departmentId: 3,
-    startDate: "2020-05-23",
-    periodOfDays: 25,
-    status: "In process"
-  }, 
-  {
-    id: 1,
-    employeeId: 10,
-    companyId: 2,
-    departmentId: 3,
-    startDate: "2020-06-23",
-    periodOfDays: 15,
-    status: "In process"
-  }
-]]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+        <logger level="INFO" doc:name="Logger" doc:id="4bc2d556-2d9a-4859-887e-e6da8b4d94e2" message="The api entered in the get:\vacations flow."/>
+		<flow-ref doc:name="getVacationsFlow" doc:id="0af71183-7df9-4fa0-8f28-d16594fb6b91" name="getVacationsFlow"/>
     </flow>
-    <flow name="get:\companies\(company_id):human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="company_id">attributes.uriParams.'company_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  id: 1,
-  name: "First Company",
-  creationDate: "2019-11-06"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+	<flow name="get:\companies\(company_id):human-resources-api-config">
+		<logger level="INFO" doc:name="Logger" doc:id="14d2d383-e3e7-4755-94b7-21508fcaa871" message="The api entered in the get:\companies\{company_id} flow."/>
+		<set-variable value="#[attributes.uriParams.company_id]" doc:name="companyId" doc:id="36f587d1-44f8-420f-a1ac-4951c61bc7ff" variableName="companyId"/>
+		<flow-ref doc:name="getCompanyByIdFlow" doc:id="7fce8124-f074-419e-942f-3ebc1c10f164" name="getCompanyByIdFlow"/>
     </flow>
     <flow name="get:\departments\(department_id):human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="department_id">attributes.uriParams.'department_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  id: 1,
-  name: "First Department",
-  companyId: 1,
-  creationDate: "2019-11-06"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="092bf0c6-9824-4d4b-b714-d894ba7f3977" message="The api entered in the get:\departments\{department_id} flow."/>
+		<set-variable value="#[attributes.uriParams.department_id]" doc:name="departmentId" doc:id="95db965e-1965-4624-9f0a-f3ef1d0f22d6" variableName="departmentId"/>
+		<flow-ref doc:name="getDepartmentByIdFlow" doc:id="040808f9-7381-4567-bd62-5dcf8a244154" name="getDepartmentByIdFlow"/>
     </flow>
     <flow name="get:\employees\(employee_id):human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="employee_id">attributes.uriParams.'employee_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  id: 10,
-  firstName: "Guy",
-  lastName: "Ritchie",
-  age: 51,
-  passportNumber: "AA888888",
-  phoneNumber: "+37369888888",
-  address: "IT",
-  companyId: 2,
-  departmentId: 1,
-  position: "film producer",
-  login: "guy",
-  password: "ritchie",
-  roles: "USER",
-  creationDate: "2019-11-06"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="c06a9ac2-ae0f-4186-9f97-a496fde075cf" message="The api entered in the get:\employees\{employee_id} flow."/>
+		<set-variable value="#[attributes.uriParams.employee_id]" doc:name="employeeId" doc:id="fb894a70-3b6a-43d4-873b-1e58a94b064b" variableName="employeeId"/>
+		<flow-ref doc:name="getEmployeeByIdFlow" doc:id="79cf2869-c1d9-48dd-ba0a-648d876709b3" name="getEmployeeByIdFlow"/>
     </flow>
     <flow name="get:\vacations\(vacation_id):human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="vacation_id">attributes.uriParams.'vacation_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  id: 1,
-  employeeId: 9,
-  companyId: 2,
-  departmentId: 3,
-  startDate: "2020-05-23",
-  periodOfDays: 25,
-  status: "In process",
-  creationDate: "2019-11-06"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="7f4401ed-b4b3-4da1-9f4a-e8e7acb80353" message="The api entered in the get:\vacations\{vacation_id} flow."/>
+		<set-variable value="#[attributes.uriParams.vacation_id]" doc:name="vacationId" doc:id="91dc6305-1bcc-4acf-97ab-da9a8e4664b7" variableName="vacationId"/>
+		<flow-ref doc:name="getVacationByIdFlow" doc:id="7ea6c55d-a11f-4218-8ec1-c2a68c4d9e43" name="getVacationByIdFlow"/>
     </flow>
     <flow name="post:\departments\companies\(company_id):application\json:human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="company_id">attributes.uriParams.'company_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "The department 'department_name' was created successfully"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="1ac12d69-cb93-4ffe-bf3b-52aeb7401e6d" message="The api entered in the post:\departments\companies\{company_id} flow."/>
+		<set-variable value="#[attributes.uriParams.company_id]" doc:name="companyId" doc:id="00ef0737-2e11-4cc5-9426-c2864da727f0" variableName="companyId"/>
+		<flow-ref doc:name="postDepartmentByCompanyIdFlow" doc:id="cd8a723a-4062-4426-afcd-630eb67a0b80" name="postDepartmentByCompanyIdFlow"/>
     </flow>
     <flow name="post:\employees\companies\(company_id):application\json:human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="company_id">attributes.uriParams.'company_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "The employee 'employee_name' was created successfully"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="016e5f95-94e5-47b3-b7b6-ff993909918c" message="The api entered in the post:\employees\companies\{company_id} flow."/>
+		<set-variable value="#[attributes.uriParams.company_id]" doc:name="companyId" doc:id="deddfa23-ec46-4d3c-b0b2-cfc769eabb88" variableName="companyId"/>
+		<flow-ref doc:name="postEmployeeByCompanyIdFlow" doc:id="f5d1832f-9db4-43b8-af58-1be606f8263e" name="postEmployeeByCompanyIdFlow"/>
     </flow>
     <flow name="post:\vacations\companies\(company_id):application\json:human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="company_id">attributes.uriParams.'company_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "The vacation was created successfully"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="0d3e90a9-0116-458d-90a6-78fbaf2a9958" message="The api entered in the post:\vacations\companies\{company_id} flow."/>
+		<set-variable value="#[attributes.uriParams.company_id]" doc:name="companyId" doc:id="a62efe63-2414-4025-9773-01d9b425bdbb" variableName="companyId"/>
+		<flow-ref doc:name="postVacationByCompanyIdFlow" doc:id="fc211532-4abc-49ce-b4aa-36f51750531a" name="postVacationByCompanyIdFlow"/>
     </flow>
     <flow name="post:\companies:application\json:human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "The company 'company_name' was created successfully"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="86e0ad99-3513-4dd5-aee6-6692c453966a" message="The api entered in the post:\companies flow."/>
+		<flow-ref doc:name="postCompaniesFlow" doc:id="9a56e776-3160-4ea0-b2dc-9658dc0545a8" name="postCompaniesFlow"/>
     </flow>
     <flow name="post:\vacations\departments\(department_id):application\json:human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="department_id">attributes.uriParams.'department_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "The vacation was created successfully"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="a2cab703-455e-42d2-919d-68d0e7df0260" message="The api entered in the post:\vacations\departments\{department_id} flow."/>
+		<set-variable value="#[attributes.uriParams.department_id]" doc:name="departmentId" doc:id="46f28f09-4b89-4e34-86bb-ebb3a61e2483" variableName="departmentId"/>
+		<flow-ref doc:name="postVacationByDepartmentIdFlow" doc:id="2078e99a-b6ed-4223-9cef-e8b0bc56a733" name="postVacationByDepartmentIdFlow"/>
     </flow>
     <flow name="post:\employees\departments\(department_id):application\json:human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="department_id">attributes.uriParams.'department_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "The employee 'employee_name' was created successfully"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="e656b4b8-9c1e-49fc-9b8d-b8634af4c71d" message="The api entered in the post:\employees\departments\{department_id} flow."/>
+		<set-variable value="#[attributes.uriParams.department_id]" doc:name="departmentId" doc:id="ac9f1448-a9e6-4b8d-80be-418a2ebe704c" variableName="departmentId"/>
+		<flow-ref doc:name="postEmployeeByDepartmentIdFlow" doc:id="4436c555-b309-4f74-96d9-52e090bd218d" name="postEmployeeByDepartmentIdFlow"/>
     </flow>
     <flow name="post:\departments:application\json:human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "The department 'department_name' was created successfully"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="50b088b6-4be2-40af-9f0f-8a13569f3c90" message="The api entered in the post:\departments flow."/>
+		<flow-ref doc:name="postDepartmentsFlow" doc:id="70e7aab9-f5b8-42d4-8110-a2433ff8113c" name="postDepartmentsFlow"/>
     </flow>
     <flow name="post:\vacations\employees\(employee_id):application\json:human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core">
-            <ee:variables>
-                <ee:set-variable variableName="employee_id">attributes.uriParams.'employee_id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "The vacation was created successfully"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="4fe7fea5-1749-48fc-b70c-c4f439cf6610" message="The api entered in the post:\vacations\employees\{employee_id} flow."/>
+		<set-variable value="#[attributes.uriParams.employee_id]" doc:name="employeeId" doc:id="022ac783-ff71-4ade-9553-f2ee792f31b4" variableName="employeeId"/>
+		<flow-ref doc:name="postVacationByEmployeeIdFlow" doc:id="75d77243-1d07-496d-82da-25bbe5898c85" name="postVacationByEmployeeIdFlow"/>
     </flow>
     <flow name="post:\employees:application\json:human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "The employee 'employee_name' was created successfully"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="bd06c018-1e1b-4a69-9cb0-f6f8b94b9de3" message="The api entered in the post:\employees flow."/>
+		<flow-ref doc:name="postEmployeesFlow" doc:id="169f9a67-cff3-4bc4-a855-a69182f3ad58" name="postEmployeesFlow"/>
     </flow>
     <flow name="post:\vacations:application\json:human-resources-api-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  message: "The vacation was created successfully"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="4005ef14-96c1-4486-8fc4-d9c6c0867a46" message="The api entered in the post:\vacations flow."/>
+		<flow-ref doc:name="postVacationsFlow" doc:id="4364b6bd-6463-454e-b1d7-7fda99682cea" name="postVacationsFlow"/>
     </flow>
 </mule>

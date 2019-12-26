@@ -1,0 +1,434 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="companies_json" format="json">
+      <types:shape format="weave" example="examples/companies.json"><![CDATA[%dw 2.0
+
+type companies_json = Array<{|  id: Number {"typeId": "int"},   name: String|}> {"example": "[{\\\"id\\\":1,\\\"name\\\":\\\"First Company\\\"},{\\\"id\\\":2,\\\"name\\\":\\\"Second Company\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="company_json" format="json">
+      <types:shape format="weave" example="examples/company.json"><![CDATA[%dw 2.0
+
+type company_json = {|
+  id: Number {"typeId": "int"}, 
+  name: String, 
+  creationDate: String
+|} {"example": "{\\\"id\\\":1,\\\"name\\\":\\\"First Company\\\",\\\"creationDate\\\":\\\"2019-11-06\\\"}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="department_json" format="json">
+      <types:shape format="weave" example="examples/department.json"><![CDATA[%dw 2.0
+
+type department_json = {|
+  id: Number {"typeId": "int"}, 
+  name: String, 
+  companyId: Number {"typeId": "int"}, 
+  creationDate: String
+|} {"example": "{\\\"id\\\":1,\\\"name\\\":\\\"First Department\\\",\\\"companyId\\\":1,\\\"creationDate\\\":\\\"2019-11-06\\\"}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="employee_json" format="json">
+      <types:shape format="weave" example="examples/employee.json"><![CDATA[%dw 2.0
+
+type employee_json = {|
+  id: Number {"typeId": "int"}, 
+  firstName: String, 
+  lastName: String, 
+  age: Number {"typeId": "int"}, 
+  passportNumber: String, 
+  phoneNumber: String, 
+  address: String, 
+  companyId: Number {"typeId": "int"}, 
+  departmentId: Number {"typeId": "int"}, 
+  position: String, 
+  login: String, 
+  password: String, 
+  roles: String, 
+  creationDate: String
+|} {"example": "{\\\"id\\\":9,\\\"firstName\\\":\\\"Alexander\\\",\\\"lastName\\\":\\\"Kolosov\\\",\\\"age\\\":41,\\\"passportNumber\\\":\\\"AA888888\\\",\\\"phoneNumber\\\":\\\"+37369888888\\\",\\\"address\\\":\\\"MD\\\",\\\"companyId\\\":2,\\\"departmentId\\\":3,\\\"position\\\":\\\"java developer\\\",\\\"login\\\":\\\"alexander\\\",\\\"password\\\":\\\"kolosov\\\",\\\"roles\\\":\\\"employee\\\",\\\"creationDate\\\":\\\"2019-11-06\\\"}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="departments_json" format="json">
+      <types:shape format="weave" example="examples/departments.json"><![CDATA[%dw 2.0
+
+type departments_json = Array<{|  id: Number {"typeId": "int"},   name: String,   companyId: Number {"typeId": "int"}|}> {"example": "[{\\\"id\\\":1,\\\"name\\\":\\\"First Department\\\",\\\"companyId\\\":1},{\\\"id\\\":2,\\\"name\\\":\\\"First Department\\\",\\\"companyId\\\":2}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="employees_json" format="json">
+      <types:shape format="weave" example="examples/employees.json"><![CDATA[%dw 2.0
+
+type employees_json = Array<{|  id: Number {"typeId": "int"},   firstName: String,   lastName: String,   companyId: Number {"typeId": "int"},   departmentId: Number {"typeId": "int"},   position: String|}> {"example": "[{\\\"id\\\":9,\\\"firstName\\\":\\\"Alexander\\\",\\\"lastName\\\":\\\"Kolosov\\\",\\\"companyId\\\":2,\\\"departmentId\\\":1,\\\"position\\\":\\\"java developer\\\"},{\\\"id\\\":5,\\\"firstName\\\":\\\"Barack\\\",\\\"lastName\\\":\\\"Obama\\\",\\\"companyId\\\":2,\\\"departmentId\\\":3,\\\"position\\\":\\\"president\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="vacation_json" format="json">
+      <types:shape format="weave" example="examples/vacation.json"><![CDATA[%dw 2.0
+
+type vacation_json = {|
+  id: Number {"typeId": "int"}, 
+  employeeId: Number {"typeId": "int"}, 
+  companyId: Number {"typeId": "int"}, 
+  departmentId: Number {"typeId": "int"}, 
+  startDate: String, 
+  periodOfDays: Number {"typeId": "int"}, 
+  status: String, 
+  creationDate: String
+|} {"example": "{\\\"id\\\":1,\\\"employeeId\\\":9,\\\"companyId\\\":2,\\\"departmentId\\\":3,\\\"startDate\\\":\\\"2020-05-23\\\",\\\"periodOfDays\\\":25,\\\"status\\\":\\\"In process\\\",\\\"creationDate\\\":\\\"2019-11-06\\\"}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="vacations_json" format="json">
+      <types:shape format="weave" example="examples/vacations.json"><![CDATA[%dw 2.0
+
+type vacations_json = Array<{|  id: Number {"typeId": "int"},   employeeId: Number {"typeId": "int"},   companyId: Number {"typeId": "int"},   departmentId: Number {"typeId": "int"},   startDate: String,   periodOfDays: Number {"typeId": "int"},   status: String|}> {"example": "[{\\\"id\\\":1,\\\"employeeId\\\":9,\\\"companyId\\\":2,\\\"departmentId\\\":3,\\\"startDate\\\":\\\"2020-05-23\\\",\\\"periodOfDays\\\":25,\\\"status\\\":\\\"In process\\\"},{\\\"id\\\":1,\\\"employeeId\\\":59,\\\"companyId\\\":2,\\\"departmentId\\\":3,\\\"startDate\\\":\\\"2020-06-23\\\",\\\"periodOfDays\\\":15,\\\"status\\\":\\\"In process\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#a254cf4c-f133-4c3a-80d5-390f05c47502">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="companies_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#1b17e90a-3fe4-4450-9f55-1c7d10ac387d">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="company_json"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#63bfb4eb-5cd4-4182-b9cd-e6dd3adb630a">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="department_json"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#66c8c7a1-152c-4b84-9787-b2adb778672d">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="department_json"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="department_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#06458473-df22-4238-8216-5708ac3c2288">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="employee_json"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="employee_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#64dbcfa4-0f38-4527-a760-df146432602b">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="departments_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#b0fd03c1-9b21-411c-b956-47f4a0600e4e">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="employees_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#882a1a8c-4747-45ab-90ad-a7848d319b05">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="vacation_json"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="vacation_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#39edd328-c156-47a4-bb3c-d678fbc67abb">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="vacations_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#4d0c1f2e-eec0-49fb-9420-86a18e631f00">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="vacations_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#826f9af1-5271-4888-8abc-4792dc1e9a06">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="departments_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#420fc432-f32a-4199-bffe-03a4e4e45bcf">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="employees_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#76da8185-2945-46d2-8fe0-7217c81092bc">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="employees_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#bee26cbb-882e-46a3-8c43-8fa7c39d723d">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="vacations_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#f9a673ec-e76e-422c-917a-937814f028d5">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="vacations_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#f42f38e7-045a-4ea2-b056-4bdf169dff67">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="company_json"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="company_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#a8e1cc18-8733-4c0a-af96-1f49394572d4">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="department_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#c1ebaa16-2f29-4100-a249-e46270d1797a">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="employee_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#40c2b953-88b7-4c5a-94dc-fd66bba7abe4">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="vacation_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#4c138172-0bb6-48b3-8a1b-4110054256df">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="company_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#16717a80-23bb-4398-b0af-202ec404f9ba">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="departments_json"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="departments_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#40fd3e58-c1b3-47e9-ae3c-f2d349beaf21">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="employee_json"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="employee_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#2e3f9a0e-93c1-41fe-acc2-f7ae0be28c16">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="vacation_json"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="vacation_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#50a1f1a6-4321-4802-91e4-c1f562aca292">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="company_json"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="company_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#b94cd832-11fb-48bd-90c5-ead28eead223">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="vacation_json"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="vacation_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#b6cfe562-1daa-4671-96c5-e87bcf2ed13f">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="employee_json"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="employee_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#107867fc-474d-4195-b16d-34c81f6ee51a">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="department_json"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="department_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#865a5585-4a87-4ff1-b40d-4bec43aac86c">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="vacation_json"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="vacation_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#b06be82d-9fe4-4d9f-b841-fb6c63d542b7">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="employee_json"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="employee_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#51e53dc1-7669-40d0-98e8-d89ac4681123">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="vacation_json"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="vacation_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>
