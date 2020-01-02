@@ -100,15 +100,6 @@ type vacations_json = Array<{|  id: Number {"typeId": "int"},   employeeId: Numb
       </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
-  <types:enrichment select="#1b17e90a-3fe4-4450-9f55-1c7d10ac387d">
-    <types:processor-declaration>
-      <types:input-event>
-        <types:message>
-          <types:payload type="company_json"/>
-        </types:message>
-      </types:input-event>
-    </types:processor-declaration>
-  </types:enrichment>
   <types:enrichment select="#63bfb4eb-5cd4-4182-b9cd-e6dd3adb630a">
     <types:processor-declaration>
       <types:input-event>
@@ -429,6 +420,15 @@ type vacations_json = Array<{|  id: Number {"typeId": "int"},   employeeId: Numb
           <types:payload type="vacation_json"/>
         </types:message>
       </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#f01d79df-bb80-4a97-8437-70077dffc00f">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="companies_json"/>
+        </types:message>
+      </types:input-event>
     </types:processor-declaration>
   </types:enrichment>
 </types:mule>
