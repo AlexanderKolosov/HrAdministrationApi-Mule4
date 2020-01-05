@@ -3,6 +3,9 @@ http:
   
 db:
   url: "jdbc:postgresql://localhost:5432/human_resources"
-  driver: "org.postgresql.Driver"
-  password: "root"
-  user: "postgres"
+  host: "![xerytk/BOPxa/U3+nZRMi0jVG8i+Xivln6xVw/F4664=]"
+  port: "![R02n3kNKFM8=]"
+  dbname: "![66f3Qz1Ou760YCyXX7iE3w==]"
+  driver: "![lkkFinfWqP24mHOjdvtt/Dd/yJWsm0bT]"
+  password: "![YFpSoWFStmk=]"
+  user: "![53CaEHgVFDoMtesQevB4uQ==]"

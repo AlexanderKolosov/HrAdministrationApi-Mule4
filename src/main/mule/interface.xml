@@ -124,153 +124,153 @@ output application/json
     </flow>
     <flow name="put:\companies\(company_id):application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="b624ada2-7a73-474c-a1da-7d89eff82765" message="The api entered in the put:\companies\{company_id} flow."/>
-		<flow-ref doc:name="putCompanyByIdFlow" doc:id="f78b4af1-4065-44a6-96ed-40cd329f2500" name="putCompanyByIdFlow"/>
+		<flow-ref doc:name="putCompanyById_Flow" doc:id="f78b4af1-4065-44a6-96ed-40cd329f2500" name="putCompanyById_Flow"/>
     </flow>
 	<flow name="put:\departments\(department_id):application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="2bd62f0a-870c-43b7-bac0-707e9ad281ed" message="The api entered in the put:\departments\{department_id} flow."/>
 		
-		<flow-ref doc:name="putDepartmentByIdFlow" doc:id="63bfb4eb-5cd4-4182-b9cd-e6dd3adb630a" name="putDepartmentByIdFlow"/>
+		<flow-ref doc:name="putDepartmentById_Flow" doc:id="63bfb4eb-5cd4-4182-b9cd-e6dd3adb630a" name="putDepartmentById_Flow"/>
     </flow>
 	<flow name="put:\employees\(employee_id):application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="8506972e-955d-4776-b9aa-6bdbb864c99c" message="The api entered in the put:\employees\{employee_id} flow."/>
 		
-		<flow-ref doc:name="putEmployeeByIdFlow" doc:id="8264a6f6-41db-48b2-9ab5-53ba2898e56f" name="putEmployeeByIdFlow"/>
+		<flow-ref doc:name="putEmployeeById_Flow" doc:id="8264a6f6-41db-48b2-9ab5-53ba2898e56f" name="putEmployeeById_Flow"/>
     </flow>
     <flow name="put:\vacations\(vacation_id):application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="045ae58e-694c-44e2-bf3b-ecb67e82f0b2" message="The api entered in the put:\vacations\{vacation_id} flow."/>
 		
-		<flow-ref doc:name="putVacationByIdFlow" doc:id="1ce46514-690e-47fb-bbb9-65e929286f3a" name="putVacationByIdFlow"/>
+		<flow-ref doc:name="putVacationById_Flow" doc:id="1ce46514-690e-47fb-bbb9-65e929286f3a" name="putVacationById_Flow"/>
     </flow>
     <flow name="delete:\companies\(company_id):human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="1cfd582d-5408-4ab1-8101-b2fd4914bb0e" message="The api entered in the delete:\companies\{company_id} flow."/>
 		
-		<flow-ref doc:name="deleteCompanyByIdFlow" doc:id="fe8f0d06-12c0-4e7e-a6be-0c9c4f217664" name="deleteCompanyByIdFlow"/>
+		<flow-ref doc:name="deleteCompanyById_Flow" doc:id="fe8f0d06-12c0-4e7e-a6be-0c9c4f217664" name="deleteCompanyById_Flow"/>
     </flow>
     <flow name="delete:\departments\(department_id):human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="225f3528-c64c-407f-ab8a-e49aee4ce3fe" message="The api entered in the delete:\departments\{department_id} flow."/>
 		
-		<flow-ref doc:name="deleteDepartmentByIdFlow" doc:id="e4606c0e-ba4a-4050-a691-1c355e6fed2e" name="deleteDepartmentByIdFlow"/>
+		<flow-ref doc:name="deleteDepartmentById_Flow" doc:id="e4606c0e-ba4a-4050-a691-1c355e6fed2e" name="deleteDepartmentById_Flow"/>
     </flow>
     <flow name="delete:\employees\(employee_id):human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="61151e7d-eda7-40f3-b655-0b4306ad6ed8" message="The api entered in the delete:\employees\{employee_id} flow."/>
 		
-		<flow-ref doc:name="deleteEmployeeByIdFlow" doc:id="b1783f86-ad2d-4f90-95f3-49ca1712c750" name="deleteEmployeeByIdFlow"/>
+		<flow-ref doc:name="deleteEmployeeById_Flow" doc:id="b1783f86-ad2d-4f90-95f3-49ca1712c750" name="deleteEmployeeById_Flow"/>
     </flow>
     <flow name="delete:\vacations\(vacation_id):human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="5f576d86-9062-468b-8509-8afb532d88cb" message="The api entered in the delete:\vacations\{vacation_id} flow."/>
 		
-		<flow-ref doc:name="deleteVacationByIdFlow" doc:id="4c9b0870-45a7-478c-829c-b79809d46e8f" name="deleteVacationByIdFlow"/>
+		<flow-ref doc:name="deleteVacationById_Flow" doc:id="4c9b0870-45a7-478c-829c-b79809d46e8f" name="deleteVacationById_Flow"/>
     </flow>
     <flow name="get:\companies:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="1425f467-df9c-494a-985e-8f81a93f690b" message="The api entered in the get:\companies flow."/>
-		<flow-ref doc:name="getCompaniesFlow" doc:id="85bb8c26-91bd-40c3-ac6d-86c444b04a2b" name="getCompaniesFlow"/>
+		<flow-ref doc:name="getCompanies_Flow" doc:id="85bb8c26-91bd-40c3-ac6d-86c444b04a2b" name="getCompanies_Flow"/>
     </flow>
     <flow name="get:\vacations\companies\(company_id):human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="a620d7aa-3f47-402c-8296-82487eff1b67" message="The api entered in the get:\vacations\companies\{company_id} flow."/>
 		
-		<flow-ref doc:name="getVacationByCompanyIdFlow" doc:id="b98312e4-ea41-4d98-bd19-dc0921197d04" name="getVacationByCompanyIdFlow"/>
+		<flow-ref doc:name="getVacationByCompanyId_Flow" doc:id="b98312e4-ea41-4d98-bd19-dc0921197d04" name="getVacationByCompanyId_Flow"/>
     </flow>
     <flow name="get:\departments\companies\(company_id):human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="21dbda3f-056d-4cc1-9e47-954ba2c0b08b" message="The api entered in the get:\departments\companies\{company_id} flow."/>
 		
-		<flow-ref doc:name="getDepartmentByCompanyIdFlow" doc:id="2825ce34-d471-480e-95e1-ffe65e002439" name="getDepartmentByCompanyIdFlow"/>
+		<flow-ref doc:name="getDepartmentByCompanyId_Flow" doc:id="2825ce34-d471-480e-95e1-ffe65e002439" name="getDepartmentByCompanyId_Flow"/>
     </flow>
     <flow name="get:\employees\companies\(company_id):human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="94b013d5-cc2e-4453-98ab-adcd6403c077" message="The api entered in the get:\employees\companies\{company_id} flow."/>
 		
-		<flow-ref doc:name="getEmployeeByCompanyIdFlow" doc:id="1e38c347-6a1f-477a-ab43-59c32e011db7" name="getEmployeeByCompanyIdFlow"/>
+		<flow-ref doc:name="getEmployeeByCompanyId_Flow" doc:id="1e38c347-6a1f-477a-ab43-59c32e011db7" name="getEmployeeByCompanyId_Flow"/>
     </flow>
     <flow name="get:\departments:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="dfebfe9b-caad-4e42-afc1-998fcd1a5904" message="The api entered in the get:\departments flow."/>
-		<flow-ref doc:name="getDepartmentsFlow" doc:id="a57a8aa5-9af6-4b2e-977d-a6324e4a8043" name="getDepartmentsFlow"/>
+		<flow-ref doc:name="getDepartments_Flow" doc:id="a57a8aa5-9af6-4b2e-977d-a6324e4a8043" name="getDepartments_Flow"/>
     </flow>
     <flow name="get:\employees\departments\(department_id):human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="851db53e-217d-484c-95f5-c3093c6bcca5" message="The api entered in the get:\employees\departments\{department_id} flow."/>
 		
-		<flow-ref doc:name="getEmployeesByDepartmentIdFlow" doc:id="10fb394c-1abe-42e4-8b06-6c608022694b" name="getEmployeesByDepartmentIdFlow"/>
+		<flow-ref doc:name="getEmployeesByDepartmentId_Flow" doc:id="10fb394c-1abe-42e4-8b06-6c608022694b" name="getEmployeesByDepartmentId_Flow"/>
     </flow>
     <flow name="get:\vacations\departments\(department_id):human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="19aa397d-362d-4187-a41f-1f9ce6dfc534" message="The api entered in the get:\vacations\departments\{department_id} flow."/>
 		
-		<flow-ref doc:name="getVacationsByDepartmentIdFlow" doc:id="9e2667da-4035-40eb-8f60-ede5c63cb3ec" name="getVacationsByDepartmentIdFlow"/>
+		<flow-ref doc:name="getVacationsByDepartmentId_Flow" doc:id="9e2667da-4035-40eb-8f60-ede5c63cb3ec" name="getVacationsByDepartmentId_Flow"/>
     </flow>
     <flow name="get:\employees:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="b12ef88d-f7cd-4aa2-9d65-354cfe9b7594" message="The api entered in the get:\employees flow."/>
-		<flow-ref doc:name="Flow Reference" doc:id="edc42adf-3b4a-4505-9bf0-ef76cf5851c5" name="getEmployeesFlow"/>
+		<flow-ref doc:name="getEmployees_Flow" doc:id="edc42adf-3b4a-4505-9bf0-ef76cf5851c5" name="getEmployees_Flow"/>
     </flow>
     <flow name="get:\vacations\employees\(employee_id):human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="eaa98ad8-6188-4391-b2aa-98a63574255d" message="The api entered in the get:\vacations\employees\{employee_id} flow."/>
 		
-		<flow-ref doc:name="getVacationsByEmployeeIdFlow" doc:id="7f22752f-f2ab-440c-a5fc-c04542434f46" name="getVacationsByEmployeeIdFlow"/>
+		<flow-ref doc:name="getVacationsByEmployeeId_Flow" doc:id="7f22752f-f2ab-440c-a5fc-c04542434f46" name="getVacationsByEmployeeId_Flow"/>
     </flow>
     <flow name="get:\vacations:human-resources-api-config">
         <logger level="INFO" doc:name="Logger" doc:id="4bc2d556-2d9a-4859-887e-e6da8b4d94e2" message="The api entered in the get:\vacations flow."/>
-		<flow-ref doc:name="getVacationsFlow" doc:id="0af71183-7df9-4fa0-8f28-d16594fb6b91" name="getVacationsFlow"/>
+		<flow-ref doc:name="getVacations_Flow" doc:id="0af71183-7df9-4fa0-8f28-d16594fb6b91" name="getVacations_Flow"/>
     </flow>
 	<flow name="get:\companies\(company_id):human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="14d2d383-e3e7-4755-94b7-21508fcaa871" message="The api entered in the get:\companies\{company_id} flow."/>
 		
-		<flow-ref doc:name="getCompanyByIdFlow" doc:id="7fce8124-f074-419e-942f-3ebc1c10f164" name="getCompanyByIdFlow"/>
+		<flow-ref doc:name="getCompanyById_Flow" doc:id="7fce8124-f074-419e-942f-3ebc1c10f164" name="getCompanyById_Flow"/>
     </flow>
     <flow name="get:\departments\(department_id):human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="092bf0c6-9824-4d4b-b714-d894ba7f3977" message="The api entered in the get:\departments\{department_id} flow."/>
 		
-		<flow-ref doc:name="getDepartmentByIdFlow" doc:id="040808f9-7381-4567-bd62-5dcf8a244154" name="getDepartmentByIdFlow"/>
+		<flow-ref doc:name="getDepartmentById_Flow" doc:id="040808f9-7381-4567-bd62-5dcf8a244154" name="getDepartmentById_Flow"/>
     </flow>
     <flow name="get:\employees\(employee_id):human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="c06a9ac2-ae0f-4186-9f97-a496fde075cf" message="The api entered in the get:\employees\{employee_id} flow."/>
 		
-		<flow-ref doc:name="getEmployeeByIdFlow" doc:id="79cf2869-c1d9-48dd-ba0a-648d876709b3" name="getEmployeeByIdFlow"/>
+		<flow-ref doc:name="getEmployeeById_Flow" doc:id="79cf2869-c1d9-48dd-ba0a-648d876709b3" name="getEmployeeById_Flow"/>
     </flow>
     <flow name="get:\vacations\(vacation_id):human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="7f4401ed-b4b3-4da1-9f4a-e8e7acb80353" message="The api entered in the get:\vacations\{vacation_id} flow."/>
 		
-		<flow-ref doc:name="getVacationByIdFlow" doc:id="7ea6c55d-a11f-4218-8ec1-c2a68c4d9e43" name="getVacationByIdFlow"/>
+		<flow-ref doc:name="getVacationById_Flow" doc:id="7ea6c55d-a11f-4218-8ec1-c2a68c4d9e43" name="getVacationById_Flow"/>
     </flow>
     <flow name="post:\departments\companies\(company_id):application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="1ac12d69-cb93-4ffe-bf3b-52aeb7401e6d" message="The api entered in the post:\departments\companies\{company_id} flow."/>
 		
-		<flow-ref doc:name="postDepartmentByCompanyIdFlow" doc:id="cd8a723a-4062-4426-afcd-630eb67a0b80" name="postDepartmentByCompanyIdFlow"/>
+		<flow-ref doc:name="postDepartmentByCompanyId_Flow" doc:id="cd8a723a-4062-4426-afcd-630eb67a0b80" name="postDepartmentByCompanyId_Flow"/>
     </flow>
     <flow name="post:\employees\companies\(company_id):application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="016e5f95-94e5-47b3-b7b6-ff993909918c" message="The api entered in the post:\employees\companies\{company_id} flow."/>
 		
-		<flow-ref doc:name="postEmployeeByCompanyIdFlow" doc:id="f5d1832f-9db4-43b8-af58-1be606f8263e" name="postEmployeeByCompanyIdFlow"/>
+		<flow-ref doc:name="postEmployeeByCompanyId_Flow" doc:id="f5d1832f-9db4-43b8-af58-1be606f8263e" name="postEmployeeByCompanyId_Flow"/>
     </flow>
     <flow name="post:\vacations\companies\(company_id):application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="0d3e90a9-0116-458d-90a6-78fbaf2a9958" message="The api entered in the post:\vacations\companies\{company_id} flow."/>
 		
-		<flow-ref doc:name="postVacationByCompanyIdFlow" doc:id="fc211532-4abc-49ce-b4aa-36f51750531a" name="postVacationByCompanyIdFlow"/>
+		<flow-ref doc:name="postVacationByCompanyId_Flow" doc:id="fc211532-4abc-49ce-b4aa-36f51750531a" name="postVacationByCompanyId_Flow"/>
     </flow>
     <flow name="post:\companies:application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="86e0ad99-3513-4dd5-aee6-6692c453966a" message="The api entered in the post:\companies flow."/>
-		<flow-ref doc:name="postCompaniesFlow" doc:id="9a56e776-3160-4ea0-b2dc-9658dc0545a8" name="postCompaniesFlow"/>
+		<flow-ref doc:name="postCompanies_Flow" doc:id="9a56e776-3160-4ea0-b2dc-9658dc0545a8" name="postCompanies_Flow"/>
     </flow>
     <flow name="post:\vacations\departments\(department_id):application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="a2cab703-455e-42d2-919d-68d0e7df0260" message="The api entered in the post:\vacations\departments\{department_id} flow."/>
 		
-		<flow-ref doc:name="postVacationByDepartmentIdFlow" doc:id="2078e99a-b6ed-4223-9cef-e8b0bc56a733" name="postVacationByDepartmentIdFlow"/>
+		<flow-ref doc:name="postVacationByDepartmentId_Flow" doc:id="2078e99a-b6ed-4223-9cef-e8b0bc56a733" name="postVacationByDepartmentId_Flow"/>
     </flow>
     <flow name="post:\employees\departments\(department_id):application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="e656b4b8-9c1e-49fc-9b8d-b8634af4c71d" message="The api entered in the post:\employees\departments\{department_id} flow."/>
 		
-		<flow-ref doc:name="postEmployeeByDepartmentIdFlow" doc:id="4436c555-b309-4f74-96d9-52e090bd218d" name="postEmployeeByDepartmentIdFlow"/>
+		<flow-ref doc:name="postEmployeeByDepartmentId_Flow" doc:id="4436c555-b309-4f74-96d9-52e090bd218d" name="postEmployeeByDepartmentId_Flow"/>
     </flow>
     <flow name="post:\departments:application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="50b088b6-4be2-40af-9f0f-8a13569f3c90" message="The api entered in the post:\departments flow."/>
-		<flow-ref doc:name="postDepartmentsFlow" doc:id="70e7aab9-f5b8-42d4-8110-a2433ff8113c" name="postDepartmentsFlow"/>
+		<flow-ref doc:name="postDepartments_Flow" doc:id="70e7aab9-f5b8-42d4-8110-a2433ff8113c" name="postDepartments_Flow"/>
     </flow>
     <flow name="post:\vacations\employees\(employee_id):application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="4fe7fea5-1749-48fc-b70c-c4f439cf6610" message="The api entered in the post:\vacations\employees\{employee_id} flow."/>
 		
-		<flow-ref doc:name="postVacationByEmployeeIdFlow" doc:id="75d77243-1d07-496d-82da-25bbe5898c85" name="postVacationByEmployeeIdFlow"/>
+		<flow-ref doc:name="postVacationByEmployeeId_Flow" doc:id="75d77243-1d07-496d-82da-25bbe5898c85" name="postVacationByEmployeeId_Flow"/>
     </flow>
     <flow name="post:\employees:application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="bd06c018-1e1b-4a69-9cb0-f6f8b94b9de3" message="The api entered in the post:\employees flow."/>
-		<flow-ref doc:name="postEmployeesFlow" doc:id="169f9a67-cff3-4bc4-a855-a69182f3ad58" name="postEmployeesFlow"/>
+		<flow-ref doc:name="postEmployees_Flow" doc:id="169f9a67-cff3-4bc4-a855-a69182f3ad58" name="postEmployees_Flow"/>
     </flow>
     <flow name="post:\vacations:application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="4005ef14-96c1-4486-8fc4-d9c6c0867a46" message="The api entered in the post:\vacations flow."/>
-		<flow-ref doc:name="postVacationsFlow" doc:id="4364b6bd-6463-454e-b1d7-7fda99682cea" name="postVacationsFlow"/>
+		<flow-ref doc:name="postVacations_Flow" doc:id="4364b6bd-6463-454e-b1d7-7fda99682cea" name="postVacations_Flow"/>
     </flow>
 </mule>

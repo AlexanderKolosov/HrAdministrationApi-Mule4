@@ -4,8 +4,7 @@
     <http:request-config name="HTTP_Request_Configuration" basePath="/api">
         <http:request-connection host="localhost" port="8081" />
     </http:request-config>
-    
-    <munit:test name="get:\companies:human-resources-api-config-200-application\json-FlowTest" description="Verifying functionality of [get:\companies:human-resources-api-config-200-application\json]">
+	<munit:test name="get:\companies:human-resources-api-config-200-application\json-FlowTest" description="Verifying functionality of [get:\companies:human-resources-api-config-200-application\json]">
         <munit:enable-flow-sources>
             <munit:enable-flow-source value="human-resources-api-main" />
             <munit:enable-flow-source value="get:\companies:human-resources-api-config" />
@@ -30,14 +29,14 @@
 			<munit-tools:assert-that expression="#[output application/json ---payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/get_200_companies_application_json.json', 'application/json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" doc:id="2aab1dc8-c5dc-4359-8333-3fd9aec99fb4" />
         </munit:validation>
     </munit:test>
-    <!-- <munit:test name="get:\companies:human-resources-api-config-404-application\json-FlowTest" description="Verifying functionality of [get:\companies:human-resources-api-config-404-application\json]">
+    <munit:test name="get:\companies:human-resources-api-config-404-application\json-FlowTest" description="Verifying functionality of [get:\companies:human-resources-api-config-404-application\json]">
         <munit:enable-flow-sources>
             <munit:enable-flow-source value="human-resources-api-main" />
             <munit:enable-flow-source value="get:\companies:human-resources-api-config" />
         </munit:enable-flow-sources>
         <munit:execution>
-            <http:request config-ref="HTTP_Request_Configuration" method="GET" path="/companies">
-                <http:headers>#[{"Accept":"application/json"}]</http:headers>
+            <http:request config-ref="HTTP_Request_Configuration" method="GET" path="/companiess">
+                <http:headers><![CDATA[#[{"Accept":"application/json"}]]]></http:headers>
                 <http:response-validator>
                     <http:success-status-code-validator values="404" />
                 </http:response-validator>
@@ -45,7 +44,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(404)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 404" />
-            <munit-tools:assert-that expression="#[output application/java -&#45;&#45;write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/get_404_companies_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+            <munit-tools:assert-that expression="#[output application/json ---payload]" is="#[MunitTools::equalTo(readUrl('classpath://scaffolder/response/get_404_companies_application_json.json', 'application/json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
         </munit:validation>
     </munit:test>
     <munit:test name="delete:\companies\(company_id):human-resources-api-config-204-application\json-FlowTest" description="Verifying functionality of [delete:\companies\(company_id):human-resources-api-config-204-application\json]">
@@ -54,7 +53,17 @@
             <munit:enable-flow-source value="delete:\companies\(company_id):human-resources-api-config" />
         </munit:enable-flow-sources>
         <munit:behavior>
-            <set-variable variableName="company_id" value="#['null']" doc:name="company_id" />
+            <set-variable variableName="company_id" value="2" doc:name="company_id" />
+			<munit-tools:mock-when doc:name="Mock db:delete" doc:id="4f1f874d-3753-4977-bb7c-4fd0479a0911" processor="db:delete">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Delete" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock set variable" doc:id="404e6030-079d-486a-a59c-6d98558da83a" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="setHttpStatusTo200" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
         </munit:behavior>
         <munit:execution>
             <http:request config-ref="HTTP_Request_Configuration" method="DELETE" path="#['/companies/$(vars.company_id)']">
@@ -63,7 +72,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(204)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 204" />
-            <munit-tools:assert-that expression="#[output application/java -&#45;&#45;write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/delete_204_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+            <munit-tools:assert-that expression="#[output application/json ---payload]" is='#[MunitTools::equalTo("")]' message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
         </munit:validation>
     </munit:test>
     <munit:test name="delete:\companies\(company_id):human-resources-api-config-400-application\json-FlowTest" description="Verifying functionality of [delete:\companies\(company_id):human-resources-api-config-400-application\json]">
@@ -84,7 +93,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(400)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 400" />
-            <munit-tools:assert-that expression="#[output application/java -&#45;&#45;write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/delete_400_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+            <munit-tools:assert-that expression="#[output application/java ---write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/delete_400_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
         </munit:validation>
     </munit:test>
     <munit:test name="delete:\companies\(company_id):human-resources-api-config-403-application\json-FlowTest" description="Verifying functionality of [delete:\companies\(company_id):human-resources-api-config-403-application\json]">
@@ -105,7 +114,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(403)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 403" />
-            <munit-tools:assert-that expression="#[output application/java -&#45;&#45;write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/delete_403_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+            <munit-tools:assert-that expression="#[output application/java ---write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/delete_403_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
         </munit:validation>
     </munit:test>
     <munit:test name="delete:\companies\(company_id):human-resources-api-config-404-application\json-FlowTest" description="Verifying functionality of [delete:\companies\(company_id):human-resources-api-config-404-application\json]">
@@ -126,7 +135,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(404)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 404" />
-            <munit-tools:assert-that expression="#[output application/java -&#45;&#45;write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/delete_404_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+            <munit-tools:assert-that expression="#[output application/java ---write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/delete_404_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
         </munit:validation>
     </munit:test>
     
@@ -146,7 +155,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 200" />
-            <munit-tools:assert-that expression="#[output application/java -&#45;&#45;write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/put_200_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+            <munit-tools:assert-that expression="#[output application/java ---write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/put_200_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
         </munit:validation>
     </munit:test>
     <munit:test name="put:\companies\(company_id):application\json:human-resources-api-config-301-application\json-FlowTest" description="Verifying functionality of [put:\companies\(company_id):application\json:human-resources-api-config-301-application\json]">
@@ -165,7 +174,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(301)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 301" />
-            <munit-tools:assert-that expression="#[output application/java -&#45;&#45;write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/put_301_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+            <munit-tools:assert-that expression="#[output application/java ---write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/put_301_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
         </munit:validation>
     </munit:test>
     <munit:test name="put:\companies\(company_id):application\json:human-resources-api-config-400-application\json-FlowTest" description="Verifying functionality of [put:\companies\(company_id):application\json:human-resources-api-config-400-application\json]">
@@ -187,7 +196,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(400)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 400" />
-            <munit-tools:assert-that expression="#[output application/java -&#45;&#45;write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/put_400_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+            <munit-tools:assert-that expression="#[output application/java ---write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/put_400_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
         </munit:validation>
     </munit:test>
     <munit:test name="put:\companies\(company_id):application\json:human-resources-api-config-403-application\json-FlowTest" description="Verifying functionality of [put:\companies\(company_id):application\json:human-resources-api-config-403-application\json]">
@@ -209,7 +218,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(403)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 403" />
-            <munit-tools:assert-that expression="#[output application/java -&#45;&#45;write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/put_403_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+            <munit-tools:assert-that expression="#[output application/java ---write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/put_403_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
         </munit:validation>
     </munit:test>
     <munit:test name="put:\companies\(company_id):application\json:human-resources-api-config-404-application\json-FlowTest" description="Verifying functionality of [put:\companies\(company_id):application\json:human-resources-api-config-404-application\json]">
@@ -231,7 +240,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(404)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 404" />
-            <munit-tools:assert-that expression="#[output application/java -&#45;&#45;write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/put_404_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+            <munit-tools:assert-that expression="#[output application/java ---write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/put_404_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
         </munit:validation>
     </munit:test>
     
@@ -250,7 +259,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(200)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 200" />
-            <munit-tools:assert-that expression="#[output application/java -&#45;&#45;write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/get_200_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+            <munit-tools:assert-that expression="#[output application/java ---write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/get_200_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
         </munit:validation>
     </munit:test>
     <munit:test name="get:\companies\(company_id):human-resources-api-config-403-application\json-FlowTest" description="Verifying functionality of [get:\companies\(company_id):human-resources-api-config-403-application\json]">
@@ -271,7 +280,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(403)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 403" />
-            <munit-tools:assert-that expression="#[output application/java -&#45;&#45;write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/get_403_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+            <munit-tools:assert-that expression="#[output application/java ---write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/get_403_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
         </munit:validation>
     </munit:test>
     <munit:test name="get:\companies\(company_id):human-resources-api-config-404-application\json-FlowTest" description="Verifying functionality of [get:\companies\(company_id):human-resources-api-config-404-application\json]">
@@ -292,7 +301,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(404)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 404" />
-            <munit-tools:assert-that expression="#[output application/java -&#45;&#45;write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/get_404_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+            <munit-tools:assert-that expression="#[output application/java ---write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/get_404_companies_{company_id}_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
         </munit:validation>
     </munit:test>
     
@@ -311,7 +320,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(201)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 201" />
-            <munit-tools:assert-that expression="#[output application/java -&#45;&#45;write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/post_201_companies_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+            <munit-tools:assert-that expression="#[output application/java ---write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/post_201_companies_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
         </munit:validation>
     </munit:test>
     <munit:test name="post:\companies:application\json:human-resources-api-config-400-application\json-FlowTest" description="Verifying functionality of [post:\companies:application\json:human-resources-api-config-400-application\json]">
@@ -332,7 +341,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(400)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 400" />
-            <munit-tools:assert-that expression="#[output application/java -&#45;&#45;write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/post_400_companies_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+            <munit-tools:assert-that expression="#[output application/java ---write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/post_400_companies_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
         </munit:validation>
     </munit:test>
     <munit:test name="post:\companies:application\json:human-resources-api-config-403-application\json-FlowTest" description="Verifying functionality of [post:\companies:application\json:human-resources-api-config-403-application\json]">
@@ -353,7 +362,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(403)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 403" />
-            <munit-tools:assert-that expression="#[output application/java -&#45;&#45;write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/post_403_companies_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+            <munit-tools:assert-that expression="#[output application/java ---write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/post_403_companies_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
         </munit:validation>
     </munit:test>
     <munit:test name="post:\companies:application\json:human-resources-api-config-404-application\json-FlowTest" description="Verifying functionality of [post:\companies:application\json:human-resources-api-config-404-application\json]">
@@ -374,7 +383,7 @@
         </munit:execution>
         <munit:validation>
             <munit-tools:assert-that expression="#[attributes.statusCode]" is="#[MunitTools::equalTo(404)]" message="The HTTP Status code is not correct!" doc:name="Assert That Status Code is 404" />
-            <munit-tools:assert-that expression="#[output application/java -&#45;&#45;write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/post_404_companies_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
+            <munit-tools:assert-that expression="#[output application/java ---write(payload, 'application/json') as String]" is="#[MunitTools::equalTo(MunitTools::getResourceAsString('scaffolder/response/post_404_companies_application_json.json'))]" message="The response payload is not correct!" doc:name="Assert That - Payload is Expected" />
         </munit:validation>
-    </munit:test> -->
+    </munit:test>
 </mule>
