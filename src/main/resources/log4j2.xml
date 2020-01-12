@@ -15,6 +15,9 @@
             <SizeBasedTriggeringPolicy size="10 MB" />
             <DefaultRolloverStrategy max="10"/>
         </RollingFile>
+        <Socket name="socket" host="2a4b64597dae450882f0a8dfff19c5c6.europe-west3.gcp.cloud.es.io" port="9243" protocol="TCP">
+  			<PatternLayout pattern="{&quot;log_timestamp&quot;:&quot;%d&quot; ,&quot;log_thread&quot;:&quot;[%t]&quot; , &quot;log_level&quot;:&quot;%-5p&quot; , %m}%n" /> 
+ 		</Socket>
     </Appenders>
     <Loggers>
         
@@ -28,6 +31,7 @@
  
         <AsyncRoot level="INFO">
             <AppenderRef ref="file" />
+            <AppenderRef ref="socket" />
         </AsyncRoot>
     </Loggers>
 </Configuration>

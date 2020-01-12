@@ -62,9 +62,9 @@ WHERE id = :id</db:sql>
 output application/json
 ---
 {
-	id: payload.id[0],
-	name: payload.name[0],
-	creationDate: payload.creation_date[0] as String
+	id: payload.id,
+	name: payload.name,
+	creationDate: payload.creationDate as String
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>

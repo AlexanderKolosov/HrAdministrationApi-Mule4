@@ -275,6 +275,11 @@ type vacations_json = Array<{|  id: Number {"typeId": "int"},   employeeId: Numb
   </types:enrichment>
   <types:enrichment select="#4c138172-0bb6-48b3-8a1b-4110054256df">
     <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="company_json"/>
+        </types:message>
+      </types:input-event>
       <types:output-event>
         <types:message>
           <types:payload type="company_json"/>
@@ -427,6 +432,15 @@ type vacations_json = Array<{|  id: Number {"typeId": "int"},   employeeId: Numb
       <types:input-event>
         <types:message>
           <types:payload type="companies_json"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#f3ceb272-5ac2-4870-b946-3ad205729187">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="company_json"/>
         </types:message>
       </types:input-event>
     </types:processor-declaration>
