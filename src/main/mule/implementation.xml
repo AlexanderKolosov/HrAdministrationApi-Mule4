@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
 	xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	
@@ -56,9 +58,9 @@ WHERE id = :id</db:sql>
 	'id': vars.companyId
 }]]]></db:input-parameters>
 		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="4c138172-0bb6-48b3-8a1b-4110054256df" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+		<ee:transform doc:name="Transform Message" doc:id="4c138172-0bb6-48b3-8a1b-4110054256df">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
@@ -119,6 +121,7 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 		</ee:transform>
 	</flow>
 	<flow name="postDepartments_Flow" doc:id="efc057e5-21e5-4f64-87cc-331a11a1d0c4" >
+		<flow-ref doc:name="setBaseUri_Subflow" doc:id="2a5e5906-6fdb-4133-9eca-efffc20bcb33" name="setBaseUri_Subflow"/>
 		<ee:transform doc:name="Transform Message" doc:id="107867fc-474d-4195-b16d-34c81f6ee51a" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -127,10 +130,11 @@ output application/json
 {
 	name: payload.name,
 	companyId: payload.companyId,
-	creationDate: now() as Date
+	creationDate: now() as DateTime {format: "yyyy-MM-dd HH:mm:ss.SSS"}
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<flow-ref doc:name="setDateAndTime_Subflow" doc:id="47eb52d9-79d1-41f2-9b73-c3193a1e92e2" name="setDateAndTime_Subflow" />
 		<flow-ref doc:name="setDepartmentName_Subflow" doc:id="31051a51-ec24-4374-b48b-9fe7a5a31620" name="setDepartmentName_Subflow"/>
 		<db:insert doc:name="Insert" doc:id="11c30909-974b-4e89-8b00-c03d3827c69c" config-ref="Database_Config">
 			<db:sql >INSERT INTO department(name, company_id, creation_date)
@@ -143,6 +147,27 @@ VALUES(:name, :id, :creationDate)
 	'creationDate': payload.creationDate
 }]]]></db:input-parameters>
 		</db:insert>
+		<db:select doc:name="Select" doc:id="6b4053ee-907a-44ad-b973-1eea6b219f45" config-ref="Database_Config">
+			<db:sql >SELECT * 
+FROM department
+WHERE creation_date = :date</db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	'date': vars.dateAndTime
+}]]]></db:input-parameters>
+		</db:select>
+		<flow-ref doc:name="setId_Subflow" doc:id="600ffea9-5b4e-453d-8d87-14b42204cacc" name="setId_Subflow"/>
+		<ee:transform doc:name="Transform Message" doc:id="a24a09fc-589d-4cd7-a017-3dd0ab7d0f3b" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="outboundHeaders" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"created_item_uri": (vars.baseUri ++ "/" ++ vars.id)
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
 		<set-payload value="#['Department ' ++ vars.departmentName ++ ' was created successfully']" doc:name="Set Payload" doc:id="b34620ec-e0f4-4ce3-8461-1eaecbd2a508" />
 	</flow>
 	<flow name="getDepartmentById_Flow" doc:id="44e72232-562e-482d-976b-7ac5427bd721" >
@@ -155,9 +180,26 @@ WHERE id = :id</db:sql>
 	'id': vars.departmentId
 }]]]></db:input-parameters>
 		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="a8e1cc18-8733-4c0a-af96-1f49394572d4" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+		<choice doc:name="Choice" doc:id="56ef031e-39d6-45b3-9643-b713b4d52e92" >
+			<when expression="#[payload.name[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="32b2c2ad-10e5-4b79-b867-0de2f7068e3d" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Department with id = " ++ vars.departmentId ++ " is not found in DB"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="a8e1cc18-8733-4c0a-af96-1f49394572d4">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
@@ -168,26 +210,61 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+			</otherwise>
+		</choice>
 	</flow>
-	<flow name="putDepartmentById_Flow" doc:id="cdbcf3ea-7551-4af9-b979-392953b63e8a" >
-	<flow-ref doc:name="setDepartmentId_Subflow" doc:id="e6cae1ac-e480-49b4-9140-c3af4854ed12" name="setDepartmentId_Subflow"/>
-		<ee:transform doc:name="Transform Message" doc:id="66c8c7a1-152c-4b84-9787-b2adb778672d" >
+	<flow name="patchDepartmentById_Flow" doc:id="cdbcf3ea-7551-4af9-b979-392953b63e8a" >
+		<scatter-gather doc:name="Scatter-Gather" doc:id="251670bb-956e-4739-8fd6-b98384e2e501" >
+			<route >
+				<flow-ref doc:name="setDepartmentId_Subflow" doc:id="f0a5dfa2-6c08-481f-bd1e-4d7eccf591b3" name="setDepartmentId_Subflow" targetValue="#[message.attributes.uriParams.department_id]" />
+			</route>
+			<route >
+				<flow-ref doc:name="setDepartmentName_Subflow" doc:id="0dffecfa-1bc0-4537-aa7f-624b7329c2fa" name="setDepartmentName_Subflow" />
+			</route>
+			<route >
+				<flow-ref doc:name="setCompanyIdFromPayload_Subflow" doc:id="2a8bab78-466e-48be-a64d-4e7342ca61c5" name="setCompanyIdFromPayload_Subflow"/>
+			</route>
+		</scatter-gather>
+		<db:select doc:name="Select" doc:id="db027409-8901-43ac-a5f3-1aad00b6337e" config-ref="Database_Config">
+			<db:sql >SELECT *
+FROM department
+WHERE id = :id</db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	'id': vars.departmentId
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="140db5d7-a113-4d57-aa5e-c3141a48eefb" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
 {
-	name: payload.name,
-	companyId: payload.companyId
+	name: payload.name[0],
+	companyId: payload.company_id[0]
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<flow-ref doc:name="setDepartmentName_Subflow" doc:id="0dffecfa-1bc0-4537-aa7f-624b7329c2fa" name="setDepartmentName_Subflow"/>
-		<db:update doc:name="Update" doc:id="4545863e-dd55-4306-9ed8-ab887b5b38bd" config-ref="Database_Config">
-			<db:sql >UPDATE department SET name = :name, company_id = :company_id WHERE id = :id</db:sql>
-			<db:input-parameters ><![CDATA[#[{
+		<scatter-gather doc:name="Scatter-Gather" doc:id="6c77957c-cf08-45f3-8547-05fe6dbe5b30" >
+			<route >
+				<choice doc:name="Choice" doc:id="ab84f223-19f3-4e5c-84fc-12d48d1b3bf5">
+					<when expression="#[vars.companyId == null]">
+						<flow-ref doc:name="setCompanyIdFromPayload_Subflow" doc:id="e3977451-6004-448f-b306-c777f6858466" name="setCompanyIdFromPayload_Subflow" />
+			</when>
+		</choice>
+			</route>
+			<route >
+				<choice doc:name="Choice" doc:id="64fb5b3b-cf82-40e5-aaa6-bc0a52c095b4">
+			<when expression="#[vars.departmentName == null]">
+						<flow-ref doc:name="setDepartmentName_Subflow" doc:id="abf55a5e-e4a8-40e8-8005-c551fb7ec086" name="setDepartmentName_Subflow" />
+			</when>
+		</choice>
+			</route>
+		</scatter-gather>
+		<db:update doc:name="Update" doc:id="499acb00-d036-4e5e-aef2-3e2fd2696b52" config-ref="Database_Config">
+			<db:sql>UPDATE department SET name = :name, company_id = :company_id WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
 	'name': vars.departmentName,
-	'company_id': payload.companyId,
+	'company_id': vars.companyId,
 	'id': vars.departmentId
 }]]]></db:input-parameters>
 		</db:update>
@@ -894,6 +971,9 @@ VALUES(:company_id, :creation_date, :department_id, :employee_id, :period_of_day
 	<sub-flow name="setCompanyId_Subflow" doc:id="b8b00e03-386a-427f-b510-7f78601bc998" >
 		<set-variable value="#[message.attributes.uriParams.company_id]" doc:name="companyId" doc:id="563ea28d-1cf0-408b-a996-2382cc20a32e" variableName="companyId" />
 	</sub-flow>
+	<sub-flow name="setCompanyIdFromPayload_Subflow" doc:id="feae0b7d-fb32-49b9-bf75-100fc9ebbb4a" >
+		<set-variable value="#[payload.companyId]" doc:name="companyId" doc:id="7bd4bc4b-894e-4a5c-bf12-648a889d8355" variableName="companyId"/>
+	</sub-flow>
 	<sub-flow name="setDepartmentId_Subflow" doc:id="b9700d72-c927-4588-b0f8-8e2355f9f794" >
 		<set-variable value="#[message.attributes.uriParams.department_id]" doc:name="departmentId" doc:id="4dcdf909-f25a-4eb3-ba9f-4860b52111db" variableName="departmentId" />
 	</sub-flow>
@@ -911,6 +991,15 @@ VALUES(:company_id, :creation_date, :department_id, :employee_id, :period_of_day
 	</sub-flow>
 	<sub-flow name="setEmployeeName_Subflow" doc:id="4a242bf7-96f5-48eb-8590-b153c5c94364" >
 		<set-variable value="#[payload.firstName ++ ' ' ++ payload.lastName]" doc:name="employeeName" doc:id="fc0fdceb-a6d1-4604-8137-1c292cd6b454" variableName="employeeName" />
+	</sub-flow>
+	<sub-flow name="setDateAndTime_Subflow" doc:id="d49de7d2-091e-45cb-98fd-98b9626f036c" >
+		<set-variable value="#[payload.creationDate]" doc:name="dateAndTime" doc:id="c900ba0a-5e51-4abf-bc90-654b163d5979" variableName="dateAndTime"/>
+	</sub-flow>
+	<sub-flow name="setId_Subflow" doc:id="a11cae7a-e576-4d70-9a0f-26d28cada9af">
+		<set-variable value="#[payload[0].id]" doc:name="id" doc:id="bd68eaa1-3f1e-454b-b56b-cceb25923fa2" variableName="id" />
+	</sub-flow>
+	<sub-flow name="setBaseUri_Subflow" doc:id="1302249b-5a48-4b57-9eba-eb7785049555" >
+		<set-variable value="#[message.attributes.localAddress ++ message.attributes.requestUri]" doc:name="baseUri" doc:id="07318b60-78c5-42d2-99a0-ce8939fef3b0" variableName="baseUri"/>
 	</sub-flow>
 	<sub-flow name="setHttpStatusTo200_Subflow" doc:id="f022288d-91d8-42ec-8a3c-bb1ca93c866a" >
 		<set-variable value="200" doc:name="httpStatus" doc:id="0e870d29-e2c8-4a4e-bad8-4ac6ab14e3c5" variableName="httpStatus" />

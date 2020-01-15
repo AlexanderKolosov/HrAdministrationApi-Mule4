@@ -4,9 +4,10 @@
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
     
     <flow name="human-resources-api-main">
-        <http:listener config-ref="human-resources-api-httpListenerConfig" path="/api/*" allowedMethods="GET, POST, PUT, DELETE" outputMimeType="application/json">
+        <http:listener config-ref="human-resources-api-httpListenerConfig" path="/api/*" outputMimeType="application/json" allowedMethods="GET, POST, PATCH, DELETE">
             <http:response statusCode="#[vars.httpStatus default 200]">
-                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]>
+               	</http:headers>
             </http:response>
             <http:error-response statusCode="#[vars.httpStatus default 500]">
                 <http:body><![CDATA[#[payload]]]></http:body>
@@ -93,6 +94,38 @@ output application/json
                     </ee:variables>
                 </ee:transform>
             </on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="21c374c2-b93a-452e-b39d-c11559e07e4c" type="DB:QUERY_EXECUTION">
+				<choice doc:name="Choice" doc:id="2937a0ba-902d-4bff-81a1-104700b0608c" >
+					<when expression='#[error.exception.cause.SQLState == "23502"]'>
+						<ee:transform doc:name="Transform Message" doc:id="30f4e587-6371-4aac-bd3c-b79d9df7bc46">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{"message": error.description}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[411]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+					</when>
+					<when expression='#[error.exception.cause.SQLState == "23505"]'>
+						<ee:transform doc:name="Transform Message" doc:id="082db9c5-7d33-466f-ba67-5a3c6bc7a24f" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": error.description
+}]]></ee:set-payload>
+							</ee:message>
+							<ee:variables >
+								<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+					</when>
+				</choice>
+			</on-error-propagate>
         </error-handler>
     </flow>
     <flow name="human-resources-api-console">
@@ -108,7 +141,8 @@ output application/json
         <apikit:console config-ref="human-resources-api-config" />
         <error-handler>
             <on-error-propagate type="APIKIT:NOT_FOUND">
-                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
                     <ee:message>
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -126,10 +160,10 @@ output application/json
 		<logger level="INFO" doc:name="Logger" doc:id="b624ada2-7a73-474c-a1da-7d89eff82765" message="The api entered in the put:\companies\{company_id} flow."/>
 		<flow-ref doc:name="putCompanyById_Flow" doc:id="f78b4af1-4065-44a6-96ed-40cd329f2500" name="putCompanyById_Flow"/>
     </flow>
-	<flow name="put:\departments\(department_id):application\json:human-resources-api-config">
-		<logger level="INFO" doc:name="Logger" doc:id="2bd62f0a-870c-43b7-bac0-707e9ad281ed" message="The api entered in the put:\departments\{department_id} flow."/>
+	<flow name="patch:\departments\(department_id):application\json:human-resources-api-config">
+		<logger level="INFO" doc:name="Logger" doc:id="2bd62f0a-870c-43b7-bac0-707e9ad281ed" message="The api entered in the patch:\departments\{department_id} flow."/>
 		
-		<flow-ref doc:name="putDepartmentById_Flow" doc:id="63bfb4eb-5cd4-4182-b9cd-e6dd3adb630a" name="putDepartmentById_Flow"/>
+		<flow-ref doc:name="patchDepartmentById_Flow" doc:id="63bfb4eb-5cd4-4182-b9cd-e6dd3adb630a" name="patchDepartmentById_Flow"/>
     </flow>
 	<flow name="put:\employees\(employee_id):application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="8506972e-955d-4776-b9aa-6bdbb864c99c" message="The api entered in the put:\employees\{employee_id} flow."/>
@@ -258,7 +292,27 @@ output application/json
     </flow>
     <flow name="post:\departments:application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="50b088b6-4be2-40af-9f0f-8a13569f3c90" message="The api entered in the post:\departments flow."/>
-		<flow-ref doc:name="postDepartments_Flow" doc:id="70e7aab9-f5b8-42d4-8110-a2433ff8113c" name="postDepartments_Flow"/>
+		<flow-ref doc:name="setPayload_Subflow" doc:id="461d0fbe-9356-43bd-aec5-891a2735feb8" name="setPayload_Subflow"/>
+		<choice doc:name="Choice" doc:id="20ebeddf-4e31-440b-93b6-51d2208078f0" >
+			<when expression='#[vars.varPayload == ""]'>
+				<ee:transform doc:name="Transform Message" doc:id="a2b99056-61d6-470e-9ac4-3f3a8709c973" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Request body is empty"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[411]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<flow-ref doc:name="postDepartments_Flow" doc:id="70e7aab9-f5b8-42d4-8110-a2433ff8113c" name="postDepartments_Flow" />
+			</otherwise>
+		</choice>
     </flow>
     <flow name="post:\vacations\employees\(employee_id):application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="4fe7fea5-1749-48fc-b70c-c4f439cf6610" message="The api entered in the post:\vacations\employees\{employee_id} flow."/>
@@ -273,4 +327,7 @@ output application/json
 		<logger level="INFO" doc:name="Logger" doc:id="4005ef14-96c1-4486-8fc4-d9c6c0867a46" message="The api entered in the post:\vacations flow."/>
 		<flow-ref doc:name="postVacations_Flow" doc:id="4364b6bd-6463-454e-b1d7-7fda99682cea" name="postVacations_Flow"/>
     </flow>
+	<sub-flow name="setPayload_Subflow" doc:id="8784c085-2f9b-405e-8ae7-fc20cfab12a2" >
+		<set-variable value="#[payload]" doc:name="varPayload" doc:id="7e5bd8f5-9363-4f14-a9f8-67984484987b" variableName="varPayload"/>
+	</sub-flow>
 </mule>

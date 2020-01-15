@@ -16,6 +16,12 @@ securitySchemes:
       responses:
         401:
           description: Unauthorized
+
+types:
+  Employee: !include /data_types/employee.raml
+  Vacation: !include /data_types/vacation.raml
+  Department: !include /data_types/department.raml
+  Company: !include /data_types/company.raml
   
 /companies:
   description: Collection of available companies
@@ -26,8 +32,7 @@ securitySchemes:
       200:
         body:
           application/json:
-            example: |
-              [{"id" : 1, "name" : "First Company"},{"id" : 2, "name" : "Second Company"}]
+            example: !include json_examples/companies.json
       404:
         body:
           application/json:
@@ -37,8 +42,7 @@ securitySchemes:
     description: Create new company
     body:
       application/json: 
-        example: |
-          {"name" : "First Company"}
+        example: !include json_examples/post_company.json
     responses:
       201:
         body:
@@ -65,8 +69,7 @@ securitySchemes:
         200:
           body:
             application/json:
-              example: |
-                {"id" : 1, "name" : "First Company", "creationDate": "2019-11-06"}
+              example: !include json_examples/company.json
         403:
           body:
             application/json:
@@ -75,12 +78,11 @@ securitySchemes:
           body:
             application/json:
               example: { "message" : "Resource not found" }
-    put:
+    patch:
       description: Edit the company with id={company_id} 
       body:
         application/json:
-          example: |
-            {"name" : "First Company"} 
+          example: !include json_examples/post_company.json 
       responses:
         200:
           body:
@@ -130,8 +132,7 @@ securitySchemes:
       200:
         body:
           application/json:
-            example: |
-              [{"id" : 1, "name" : "First Department", "companyId": 1},{"id" : 2, "name" : "Second Department", "companyId": 1}]
+            example: !include json_examples/departments.json
       404:
         body:
           application/json:
@@ -141,8 +142,7 @@ securitySchemes:
     description: Create new department
     body:
       application/json: 
-        example: |
-          {"name" : "Third Department", "companyId": 1}
+        example: !include json_examples/post_department.json
     responses:
       201:
         body:
@@ -169,8 +169,7 @@ securitySchemes:
         200:
           body:
             application/json:
-              example: |
-                {"id" : 1, "name" : "First Department", "companyId": 1, "creationDate": "2019-11-06"}
+              example: !include json_examples/department.json
         403:
           body:
             application/json:
@@ -179,12 +178,11 @@ securitySchemes:
           body:
             application/json:
               example: { "message" : "Resource not found" }
-    put:
+    patch:
       description: Edit the department with id={department_id} 
       body:
         application/json:
-          example: |
-            {"name" : "First Department"} 
+          example: !include json_examples/post_department.json 
       responses:
         200:
           body:
@@ -234,8 +232,7 @@ securitySchemes:
         200:
           body:
             application/json:
-              example: |
-                [{"id" : 1, "name" : "First Department", "companyId": 1},{"id" : 2, "name" : "Second Department", "companyId": 1}]
+              example: !include json_examples/departments.json
         404:
           body:
             application/json:
@@ -245,8 +242,7 @@ securitySchemes:
       description: Create new department of the company with id={company_id}
       body:
         application/json: 
-          example: |
-            {"name" : "Third Department"}
+          example: !include json_examples/post_department.json
       responses:
         201:
           body:
@@ -274,25 +270,7 @@ securitySchemes:
       200:
         body:
           application/json:
-            example: |
-              [
-                { 
-                  "id" : 9, 
-                  "firstName" : "Alexander",
-                  "lastName" : "Kolosov",
-                  "companyId" : 2,
-                  "departmentId" : 1,
-                  "position" : "java developer"
-                },
-                { 
-                  "id" : 5, 
-                  "firstName" : "John",
-                  "lastName" : "Snow",
-                  "companyId" : 2,
-                  "departmentId" : 1,
-                  "position" : "warrior"
-                }
-              ]
+            example: !include json_examples/employees.json
       404:
         body:
           application/json:
@@ -302,21 +280,7 @@ securitySchemes:
     description: Create new  employee
     body:
       application/json: 
-        example: |
-          { 
-            "firstName" : "Guy",
-            "lastName" : "Ritchie",
-            "age" : 51,
-            "passportNumber" : "AA888888",
-            "phoneNumber" : "+37369888888",
-            "address" : "IT",
-            "companyId" : 2,
-            "departmentId" : 1,
-            "position" : "film producer", 
-            "login" : "guy", 
-            "password" : "ritchie", 
-            "roles" : "USER"
-          }
+        example: !include json_examples/post_employee.json
     responses:
       201:
         body:
@@ -343,23 +307,7 @@ securitySchemes:
         200:
           body:
             application/json:
-              example: |
-                { 
-                  "id" : 10, 
-                  "firstName" : "Guy",
-                  "lastName" : "Ritchie",
-                  "age" : 51,
-                  "passportNumber" : "AA888888",
-                  "phoneNumber" : "+37369888888",
-                  "address" : "IT",
-                  "companyId" : 2,
-                  "departmentId" : 1,
-                  "position" : "film producer", 
-                  "login" : "guy", 
-                  "password" : "ritchie", 
-                  "roles" : "USER",
-                  "creationDate": "2019-11-06"
-                }
+              example: !include json_examples/employee.json
         403:
           body:
             application/json:
@@ -372,21 +320,7 @@ securitySchemes:
       description: Edit the employee with id={employee_id} 
       body:
         application/json:
-          example: |
-            { 
-              "firstName" : "Guy",
-              "lastName" : "Ritchie",
-              "age" : 51,
-              "passportNumber" : "AA888888",
-              "phoneNumber" : "+37369888888",
-              "address" : "IT",
-              "companyId" : 2,
-              "departmentId" : 1,
-              "position" : "film producer", 
-              "login" : "guy", 
-              "password" : "ritchie", 
-              "roles" : "USER"
-            }
+          example: !include json_examples/post_employee.json
       responses:
         200:
           body:
@@ -436,25 +370,7 @@ securitySchemes:
         200:
           body:
             application/json:
-              example: |
-                [
-                  { 
-                    "id" : 9, 
-                    "firstName" : "Alexander",
-                    "lastName" : "Kolosov",
-                    "companyId" : 2,
-                    "departmentId" : 1,
-                    "position" : "java developer"
-                  },
-                  { 
-                    "id" : 5, 
-                    "firstName" : "John",
-                    "lastName" : "Snow",
-                    "companyId" : 2,
-                    "departmentId" : 1,
-                    "position" : "warrior"
-                  }
-                ]
+              example: !include json_examples/employees.json
         404:
           body:
             application/json:
@@ -464,20 +380,7 @@ securitySchemes:
       description: Create new employee of the company with id={company_id}
       body:
         application/json: 
-          example: |
-            { 
-              "firstName" : "Guy",
-              "lastName" : "Ritchie",
-              "age" : 51,
-              "passportNumber" : "AA888888",
-              "phoneNumber" : "+37369888888",
-              "address" : "IT",
-              "departmentId" : 1,
-              "position" : "film producer", 
-              "login" : "guy", 
-              "password" : "ritchie", 
-              "roles" : "USER"
-            }
+          example: !include json_examples/post_employee.json
       responses:
         201:
           body:
@@ -504,25 +407,7 @@ securitySchemes:
         200:
           body:
             application/json:
-              example: |
-                [
-                  { 
-                    "id" : 9, 
-                    "firstName" : "Alexander",
-                    "lastName" : "Kolosov",
-                    "companyId" : 2,
-                    "departmentId" : 1,
-                    "position" : "java developer"
-                  },
-                  { 
-                    "id" : 5, 
-                    "firstName" : "John",
-                    "lastName" : "Snow",
-                    "companyId" : 2,
-                    "departmentId" : 1,
-                    "position" : "warrior"
-                  }
-                ]
+              example: !include json_examples/employees.json
         404:
           body:
             application/json:
@@ -532,20 +417,7 @@ securitySchemes:
       description: Create new employee of the department with id={department_id}
       body:
         application/json: 
-          example: |
-            { 
-              "firstName" : "Guy",
-              "lastName" : "Ritchie",
-              "age" : 51,
-              "passportNumber" : "AA888888",
-              "phoneNumber" : "+37369888888",
-              "address" : "IT",
-              "companyId" : 2,
-              "position" : "film producer", 
-              "login" : "guy", 
-              "password" : "ritchie", 
-              "roles" : "USER"
-            }
+          example: !include json_examples/post_employee.json
       responses:
         201:
           body:
@@ -573,27 +445,7 @@ securitySchemes:
       200:
         body:
           application/json:
-            example: |
-              [
-                { 
-                  "id" : 1, 
-                  "employeeId" : 9,
-                  "companyId" : 2,
-                  "departmentId" : 3,
-                  "startDate" : "2020-05-23",
-                  "periodOfDays" : 25,
-                  "status": "In process"
-                },
-                {
-                  "id" : 1, 
-                  "employeeId" : 10,
-                  "companyId" : 2,
-                  "departmentId" : 3,
-                  "startDate" : "2020-06-23",
-                  "periodOfDays" : 15,
-                  "status": "In process"
-                }
-              ]
+            example: !include json_examples/vacations.json
       404:
         body:
           application/json:
@@ -603,16 +455,7 @@ securitySchemes:
     description: Create new vacation
     body:
       application/json: 
-        example: |
-          { 
-            "id" : 11, 
-            "employeeId" : 5,
-            "companyId" : 2,
-            "departmentId" : 3,
-            "startDate" : "2020-09-23",
-            "periodOfDays" : 20,
-            "status": "In process"
-          }
+        example: !include json_examples/post_vacation.json
     responses:
       201:
         body:
@@ -639,17 +482,7 @@ securitySchemes:
         200:
           body:
             application/json:
-              example: |
-                { 
-                  "id" : 1, 
-                  "employeeId" : 9,
-                  "companyId" : 2,
-                  "departmentId" : 3,
-                  "startDate" : "2020-05-23",
-                  "periodOfDays" : 25,
-                  "status": "In process",
-                  "creationDate": "2019-11-06"
-                }
+              example: !include json_examples/vacation.json
         403:
           body:
             application/json:
@@ -662,16 +495,7 @@ securitySchemes:
       description: Edit the vacation with id={vacation_id} 
       body:
         application/json:
-          example: |
-            { 
-              "id" : 1, 
-              "employeeId" : 9,
-              "companyId" : 2,
-              "departmentId" : 3,
-              "startDate" : "2020-05-23",
-              "periodOfDays" : 25,
-              "status": "Approved"
-            } 
+          example: !include json_examples/post_vacation.json 
       responses:
         200:
           body:
@@ -721,27 +545,7 @@ securitySchemes:
         200:
           body:
             application/json:
-              example: |
-                [
-                  { 
-                    "id" : 1, 
-                    "employeeId" : 9,
-                    "companyId" : 2,
-                    "departmentId" : 3,
-                    "startDate" : "2020-05-23",
-                    "periodOfDays" : 25,
-                    "status": "In process"
-                  },
-                  {
-                    "id" : 1, 
-                    "employeeId" : 10,
-                    "companyId" : 2,
-                    "departmentId" : 3,
-                    "startDate" : "2020-06-23",
-                    "periodOfDays" : 15,
-                    "status": "In process"
-                  }
-                ]
+              example: !include json_examples/vacations.json
         404:
           body:
             application/json:
@@ -751,15 +555,7 @@ securitySchemes:
       description: Create new vacation of company with id={company_id}
       body:
         application/json: 
-          example: |
-            { 
-              "id" : 11, 
-              "employeeId" : 5,
-              "departmentId" : 3,
-              "startDate" : "2020-09-23",
-              "periodOfDays" : 20,
-              "status": "In process"
-            }
+          example: !include json_examples/post_vacation.json
       responses:
         201:
           body:
@@ -786,27 +582,7 @@ securitySchemes:
         200:
           body:
             application/json:
-              example: |
-                [
-                  { 
-                    "id" : 1, 
-                    "employeeId" : 9,
-                    "companyId" : 2,
-                    "departmentId" : 3,
-                    "startDate" : "2020-05-23",
-                    "periodOfDays" : 25,
-                    "status": "In process"
-                  },
-                  {
-                    "id" : 1, 
-                    "employeeId" : 10,
-                    "companyId" : 2,
-                    "departmentId" : 3,
-                    "startDate" : "2020-06-23",
-                    "periodOfDays" : 15,
-                    "status": "In process"
-                  }
-                ]
+              example: !include json_examples/vacations.json
         404:
           body:
             application/json:
@@ -816,15 +592,7 @@ securitySchemes:
       description: Create new vacation of department with id={department_id}
       body:
         application/json: 
-          example: |
-            { 
-              "id" : 11, 
-              "employeeId" : 5,
-              "departmentId" : 3,
-              "startDate" : "2020-09-23",
-              "periodOfDays" : 20,
-              "status": "In process"
-            }
+          example: !include json_examples/post_vacation.json
       responses:
         201:
           body:
@@ -851,27 +619,7 @@ securitySchemes:
         200:
           body:
             application/json:
-              example: |
-                [
-                  { 
-                    "id" : 1, 
-                    "employeeId" : 9,
-                    "companyId" : 2,
-                    "departmentId" : 3,
-                    "startDate" : "2020-05-23",
-                    "periodOfDays" : 25,
-                    "status": "In process"
-                  },
-                  {
-                    "id" : 1, 
-                    "employeeId" : 10,
-                    "companyId" : 2,
-                    "departmentId" : 3,
-                    "startDate" : "2020-06-23",
-                    "periodOfDays" : 15,
-                    "status": "In process"
-                  }
-                ]
+              example: !include json_examples/vacations.json
         404:
           body:
             application/json:
@@ -881,15 +629,7 @@ securitySchemes:
       description: Create new vacation of employee with id={employee_id}
       body:
         application/json: 
-          example: |
-            { 
-              "id" : 11, 
-              "employeeId" : 5,
-              "departmentId" : 3,
-              "startDate" : "2020-09-23",
-              "periodOfDays" : 20,
-              "status": "In process"
-            }
+          example: !include json_examples/post_vacation.json
       responses:
         201:
           body:

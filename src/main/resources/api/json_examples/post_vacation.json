@@ -1,0 +1,8 @@
+{ 
+    "employeeId" : 9,
+    "companyId" : 2,
+    "departmentId" : 3,
+    "startDate" : "2020-05-23",
+    "periodOfDays" : 25,
+    "status": "In process"
+}

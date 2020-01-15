@@ -6,6 +6,12 @@
     "063f033f-2e06-4f74-b54d-7a0003927014": {
       "payload": "sample_data/unknown.dwl"
     },
-    "f01d79df-bb80-4a97-8437-70077dffc00f": {}
+    "f01d79df-bb80-4a97-8437-70077dffc00f": {},
+    "5d6c3464-010d-4ad2-9548-a1032593e2b5": {},
+    "d62dc975-e25e-49fc-8bba-a857f0da1aeb": {},
+    "a24a09fc-589d-4cd7-a017-3dd0ab7d0f3b": {
+      "vars-baseUri": "sample_data/defaultstringtype.dwl"
+    },
+    "e22ce889-b068-41b2-95dd-2331620f884e": {}
   }
 }

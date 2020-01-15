@@ -15,7 +15,7 @@
 					<munit-tools:with-attribute whereValue="Select" attributeName="doc:name" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return >
-					<munit-tools:payload value="#[MunitTools::getResourceAsString('examples/companies.json')]" />
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('api/json_examples/companies.json')]" />
 				</munit-tools:then-return>
 			</munit-tools:mock-when>
 		</munit:behavior>
@@ -202,7 +202,7 @@
 					<munit-tools:with-attribute whereValue="Select" attributeName="doc:name" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return >
-					<munit-tools:payload value="#[MunitTools::getResourceAsString('examples/company.json')]" />
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('api/json_examples/company.json')]" />
 				</munit-tools:then-return>
 			</munit-tools:mock-when>
         </munit:behavior>

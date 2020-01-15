@@ -90,6 +90,10 @@ type vacations_json = Array<{|  id: Number {"typeId": "int"},   employeeId: Numb
 
 ]]></types:shape>
     </types:type>
+    <types:type name="uri_string" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+type: string]]></types:shape>
+    </types:type>
   </types:catalog>
   <types:enrichment select="#a254cf4c-f133-4c3a-80d5-390f05c47502">
     <types:processor-declaration>
@@ -107,20 +111,6 @@ type vacations_json = Array<{|  id: Number {"typeId": "int"},   employeeId: Numb
           <types:payload type="department_json"/>
         </types:message>
       </types:input-event>
-    </types:processor-declaration>
-  </types:enrichment>
-  <types:enrichment select="#66c8c7a1-152c-4b84-9787-b2adb778672d">
-    <types:processor-declaration>
-      <types:input-event>
-        <types:message>
-          <types:payload type="department_json"/>
-        </types:message>
-      </types:input-event>
-      <types:output-event>
-        <types:message>
-          <types:payload type="department_json"/>
-        </types:message>
-      </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
   <types:enrichment select="#06458473-df22-4238-8216-5708ac3c2288">
@@ -443,6 +433,43 @@ type vacations_json = Array<{|  id: Number {"typeId": "int"},   employeeId: Numb
           <types:payload type="company_json"/>
         </types:message>
       </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#140db5d7-a113-4d57-aa5e-c3141a48eefb">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="department_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#a24a09fc-589d-4cd7-a017-3dd0ab7d0f3b">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:variables>
+          <types:variable name="baseUri" type="uri_string"/>
+        </types:variables>
+      </types:input-event>
+      <types:output-event>
+        <types:variables>
+          <types:variable name="outboundHeaders" type="uri_string"/>
+        </types:variables>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#a2b99056-61d6-470e-9ac4-3f3a8709c973">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="department_json"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="uri_string"/>
+        </types:message>
+      </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
 </types:mule>
