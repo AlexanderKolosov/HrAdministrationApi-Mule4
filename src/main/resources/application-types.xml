@@ -113,20 +113,6 @@ type: string]]></types:shape>
       </types:input-event>
     </types:processor-declaration>
   </types:enrichment>
-  <types:enrichment select="#06458473-df22-4238-8216-5708ac3c2288">
-    <types:processor-declaration>
-      <types:input-event>
-        <types:message>
-          <types:payload type="employee_json"/>
-        </types:message>
-      </types:input-event>
-      <types:output-event>
-        <types:message>
-          <types:payload type="employee_json"/>
-        </types:message>
-      </types:output-event>
-    </types:processor-declaration>
-  </types:enrichment>
   <types:enrichment select="#64dbcfa4-0f38-4527-a760-df146432602b">
     <types:processor-declaration>
       <types:output-event>
@@ -141,20 +127,6 @@ type: string]]></types:shape>
       <types:output-event>
         <types:message>
           <types:payload type="employees_json"/>
-        </types:message>
-      </types:output-event>
-    </types:processor-declaration>
-  </types:enrichment>
-  <types:enrichment select="#882a1a8c-4747-45ab-90ad-a7848d319b05">
-    <types:processor-declaration>
-      <types:input-event>
-        <types:message>
-          <types:payload type="vacation_json"/>
-        </types:message>
-      </types:input-event>
-      <types:output-event>
-        <types:message>
-          <types:payload type="vacation_json"/>
         </types:message>
       </types:output-event>
     </types:processor-declaration>
@@ -277,48 +249,6 @@ type: string]]></types:shape>
       </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
-  <types:enrichment select="#16717a80-23bb-4398-b0af-202ec404f9ba">
-    <types:processor-declaration>
-      <types:input-event>
-        <types:message>
-          <types:payload type="departments_json"/>
-        </types:message>
-      </types:input-event>
-      <types:output-event>
-        <types:message>
-          <types:payload type="departments_json"/>
-        </types:message>
-      </types:output-event>
-    </types:processor-declaration>
-  </types:enrichment>
-  <types:enrichment select="#40fd3e58-c1b3-47e9-ae3c-f2d349beaf21">
-    <types:processor-declaration>
-      <types:input-event>
-        <types:message>
-          <types:payload type="employee_json"/>
-        </types:message>
-      </types:input-event>
-      <types:output-event>
-        <types:message>
-          <types:payload type="employee_json"/>
-        </types:message>
-      </types:output-event>
-    </types:processor-declaration>
-  </types:enrichment>
-  <types:enrichment select="#2e3f9a0e-93c1-41fe-acc2-f7ae0be28c16">
-    <types:processor-declaration>
-      <types:input-event>
-        <types:message>
-          <types:payload type="vacation_json"/>
-        </types:message>
-      </types:input-event>
-      <types:output-event>
-        <types:message>
-          <types:payload type="vacation_json"/>
-        </types:message>
-      </types:output-event>
-    </types:processor-declaration>
-  </types:enrichment>
   <types:enrichment select="#50a1f1a6-4321-4802-91e4-c1f562aca292">
     <types:processor-declaration>
       <types:input-event>
@@ -333,77 +263,7 @@ type: string]]></types:shape>
       </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
-  <types:enrichment select="#b94cd832-11fb-48bd-90c5-ead28eead223">
-    <types:processor-declaration>
-      <types:input-event>
-        <types:message>
-          <types:payload type="vacation_json"/>
-        </types:message>
-      </types:input-event>
-      <types:output-event>
-        <types:message>
-          <types:payload type="vacation_json"/>
-        </types:message>
-      </types:output-event>
-    </types:processor-declaration>
-  </types:enrichment>
-  <types:enrichment select="#b6cfe562-1daa-4671-96c5-e87bcf2ed13f">
-    <types:processor-declaration>
-      <types:input-event>
-        <types:message>
-          <types:payload type="employee_json"/>
-        </types:message>
-      </types:input-event>
-      <types:output-event>
-        <types:message>
-          <types:payload type="employee_json"/>
-        </types:message>
-      </types:output-event>
-    </types:processor-declaration>
-  </types:enrichment>
-  <types:enrichment select="#107867fc-474d-4195-b16d-34c81f6ee51a">
-    <types:processor-declaration>
-      <types:input-event>
-        <types:message>
-          <types:payload type="department_json"/>
-        </types:message>
-      </types:input-event>
-      <types:output-event>
-        <types:message>
-          <types:payload type="department_json"/>
-        </types:message>
-      </types:output-event>
-    </types:processor-declaration>
-  </types:enrichment>
   <types:enrichment select="#865a5585-4a87-4ff1-b40d-4bec43aac86c">
-    <types:processor-declaration>
-      <types:input-event>
-        <types:message>
-          <types:payload type="vacation_json"/>
-        </types:message>
-      </types:input-event>
-      <types:output-event>
-        <types:message>
-          <types:payload type="vacation_json"/>
-        </types:message>
-      </types:output-event>
-    </types:processor-declaration>
-  </types:enrichment>
-  <types:enrichment select="#b06be82d-9fe4-4d9f-b841-fb6c63d542b7">
-    <types:processor-declaration>
-      <types:input-event>
-        <types:message>
-          <types:payload type="employee_json"/>
-        </types:message>
-      </types:input-event>
-      <types:output-event>
-        <types:message>
-          <types:payload type="employee_json"/>
-        </types:message>
-      </types:output-event>
-    </types:processor-declaration>
-  </types:enrichment>
-  <types:enrichment select="#51e53dc1-7669-40d0-98e8-d89ac4681123">
     <types:processor-declaration>
       <types:input-event>
         <types:message>
@@ -433,15 +293,6 @@ type: string]]></types:shape>
           <types:payload type="company_json"/>
         </types:message>
       </types:input-event>
-    </types:processor-declaration>
-  </types:enrichment>
-  <types:enrichment select="#140db5d7-a113-4d57-aa5e-c3141a48eefb">
-    <types:processor-declaration>
-      <types:output-event>
-        <types:message>
-          <types:payload type="department_json"/>
-        </types:message>
-      </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
   <types:enrichment select="#a24a09fc-589d-4cd7-a017-3dd0ab7d0f3b">

@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:file="http://www.mulesoft.org/schema/mule/file"
-	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
     
-    <flow name="human-resources-api-main">
+    <validation:config name="Validation_Config" doc:name="Validation Config" doc:id="f04363e4-946b-4ca0-9f86-3cc5632472f3" i18n="#[payload]" />
+	<flow name="human-resources-api-main">
         <http:listener config-ref="human-resources-api-httpListenerConfig" path="/api/*" outputMimeType="application/json" allowedMethods="GET, POST, PATCH, DELETE">
             <http:response statusCode="#[vars.httpStatus default 200]">
                 <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]>
@@ -74,7 +76,7 @@ output application/json
                         <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{message: "Unsupported media type"}]]></ee:set-payload>
+{message: "Unsupported media type or request body is empty"}]]></ee:set-payload>
                     </ee:message>
                     <ee:variables>
                         <ee:set-variable variableName="httpStatus"><![CDATA[415]]></ee:set-variable>
@@ -124,11 +126,53 @@ output application/json
 							</ee:variables>
 						</ee:transform>
 					</when>
+					<when expression='#[error.exception.cause.SQLState == "07006"]'>
+						<ee:transform doc:name="Transform Message" doc:id="6dc55da0-753e-4e79-8dd9-0062fed4ab2e" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": error.description
+}]]></ee:set-payload>
+							</ee:message>
+							<ee:variables >
+								<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+					</when>
+					<when expression='#[error.exception.cause.SQLState == "42883"]'>
+						<ee:transform doc:name="Transform Message" doc:id="b73d0a8b-e34a-4431-a51e-7eae509f44da" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Column " ++ payload.key ++ " is not exist in " ++ vars.tableName ++ " table"
+}]]></ee:set-payload>
+							</ee:message>
+							<ee:variables >
+								<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+					</when>
+					<when expression='#[error.exception.cause.SQLState == "42703"]'>
+						<ee:transform doc:name="Transform Message" doc:id="f9664065-c222-437e-a701-992691fe8f73" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Column " ++ payload.key ++ " is not exist in " ++ vars.tableName ++ " table"
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+					</when>
 				</choice>
 			</on-error-propagate>
         </error-handler>
     </flow>
-    <flow name="human-resources-api-console">
+	<flow name="human-resources-api-console">
         <http:listener config-ref="human-resources-api-httpListenerConfig" path="/console/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
                 <http:headers>#[vars.outboundHeaders default {}]</http:headers>
@@ -156,24 +200,55 @@ output application/json
             </on-error-propagate>
         </error-handler>
     </flow>
-    <flow name="put:\companies\(company_id):application\json:human-resources-api-config">
+    <flow name="post:\companies:application\json:human-resources-api-config">
+		<logger level="INFO" doc:name="Logger" doc:id="86e0ad99-3513-4dd5-aee6-6692c453966a" message="The api entered in the post:\companies flow." />
+		<flow-ref doc:name="postCompanies_Flow" doc:id="9a56e776-3160-4ea0-b2dc-9658dc0545a8" name="postCompanies_Flow" />
+    </flow>
+	<flow name="post:\departments:application\json:human-resources-api-config">
+		<logger level="INFO" doc:name="Logger" doc:id="50b088b6-4be2-40af-9f0f-8a13569f3c90" message="The api entered in the post:\departments flow." />
+		<flow-ref doc:name="postDepartments_Flow" doc:id="70e7aab9-f5b8-42d4-8110-a2433ff8113c" name="postDepartments_Flow" />
+    </flow>
+	<flow name="post:\vacations:application\json:human-resources-api-config">
+		<logger level="INFO" doc:name="Logger" doc:id="4005ef14-96c1-4486-8fc4-d9c6c0867a46" message="The api entered in the post:\vacations flow." />
+		<flow-ref doc:name="postVacations_Flow" doc:id="4364b6bd-6463-454e-b1d7-7fda99682cea" name="postVacations_Flow" />
+    </flow>
+	<flow name="post:\employees:application\json:human-resources-api-config">
+		<logger level="INFO" doc:name="Logger" doc:id="bd06c018-1e1b-4a69-9cb0-f6f8b94b9de3" message="The api entered in the post:\employees flow." />
+		<flow-ref doc:name="postEmployees_Flow" doc:id="169f9a67-cff3-4bc4-a855-a69182f3ad58" name="postEmployees_Flow" />
+    </flow>
+	<flow name="get:\companies\(company_id):human-resources-api-config">
+		<logger level="INFO" doc:name="Logger" doc:id="14d2d383-e3e7-4755-94b7-21508fcaa871" message="The api entered in the get:\companies\{company_id} flow." />
+		
+		<flow-ref doc:name="getCompanyById_Flow" doc:id="7fce8124-f074-419e-942f-3ebc1c10f164" name="getCompanyById_Flow" />
+    </flow>
+	<flow name="get:\departments\(department_id):human-resources-api-config">
+		<logger level="INFO" doc:name="Logger" doc:id="092bf0c6-9824-4d4b-b714-d894ba7f3977" message="The api entered in the get:\departments\{department_id} flow." />
+		
+		<flow-ref doc:name="getDepartmentById_Flow" doc:id="040808f9-7381-4567-bd62-5dcf8a244154" name="getDepartmentById_Flow" />
+    </flow>
+	<flow name="get:\employees\departments\(department_id):human-resources-api-config">
+		<logger level="INFO" doc:name="Logger" doc:id="851db53e-217d-484c-95f5-c3093c6bcca5" message="The api entered in the get:\employees\departments\{department_id} flow." />
+		
+		<flow-ref doc:name="getEmployeesByDepartmentId_Flow" doc:id="10fb394c-1abe-42e4-8b06-6c608022694b" name="getEmployeesByDepartmentId_Flow" />
+    </flow>
+	<flow name="patch:\companies\(company_id):application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="b624ada2-7a73-474c-a1da-7d89eff82765" message="The api entered in the put:\companies\{company_id} flow."/>
-		<flow-ref doc:name="putCompanyById_Flow" doc:id="f78b4af1-4065-44a6-96ed-40cd329f2500" name="putCompanyById_Flow"/>
+		<flow-ref doc:name="patchCompanyById_Flow" doc:id="f78b4af1-4065-44a6-96ed-40cd329f2500" name="patchCompanyById_Flow"/>
     </flow>
 	<flow name="patch:\departments\(department_id):application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="2bd62f0a-870c-43b7-bac0-707e9ad281ed" message="The api entered in the patch:\departments\{department_id} flow."/>
 		
 		<flow-ref doc:name="patchDepartmentById_Flow" doc:id="63bfb4eb-5cd4-4182-b9cd-e6dd3adb630a" name="patchDepartmentById_Flow"/>
     </flow>
-	<flow name="put:\employees\(employee_id):application\json:human-resources-api-config">
+	<flow name="patch:\employees\(employee_id):application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="8506972e-955d-4776-b9aa-6bdbb864c99c" message="The api entered in the put:\employees\{employee_id} flow."/>
 		
-		<flow-ref doc:name="putEmployeeById_Flow" doc:id="8264a6f6-41db-48b2-9ab5-53ba2898e56f" name="putEmployeeById_Flow"/>
+		<flow-ref doc:name="patchEmployeeById_Flow" doc:id="8264a6f6-41db-48b2-9ab5-53ba2898e56f" name="patchEmployeeById_Flow"/>
     </flow>
-    <flow name="put:\vacations\(vacation_id):application\json:human-resources-api-config">
+    <flow name="patch:\vacations\(vacation_id):application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="045ae58e-694c-44e2-bf3b-ecb67e82f0b2" message="The api entered in the put:\vacations\{vacation_id} flow."/>
 		
-		<flow-ref doc:name="putVacationById_Flow" doc:id="1ce46514-690e-47fb-bbb9-65e929286f3a" name="putVacationById_Flow"/>
+		<flow-ref doc:name="patchVacationById_Flow" doc:id="1ce46514-690e-47fb-bbb9-65e929286f3a" name="patchVacationById_Flow"/>
     </flow>
     <flow name="delete:\companies\(company_id):human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="1cfd582d-5408-4ab1-8101-b2fd4914bb0e" message="The api entered in the delete:\companies\{company_id} flow."/>
@@ -218,11 +293,6 @@ output application/json
 		<logger level="INFO" doc:name="Logger" doc:id="dfebfe9b-caad-4e42-afc1-998fcd1a5904" message="The api entered in the get:\departments flow."/>
 		<flow-ref doc:name="getDepartments_Flow" doc:id="a57a8aa5-9af6-4b2e-977d-a6324e4a8043" name="getDepartments_Flow"/>
     </flow>
-    <flow name="get:\employees\departments\(department_id):human-resources-api-config">
-		<logger level="INFO" doc:name="Logger" doc:id="851db53e-217d-484c-95f5-c3093c6bcca5" message="The api entered in the get:\employees\departments\{department_id} flow."/>
-		
-		<flow-ref doc:name="getEmployeesByDepartmentId_Flow" doc:id="10fb394c-1abe-42e4-8b06-6c608022694b" name="getEmployeesByDepartmentId_Flow"/>
-    </flow>
     <flow name="get:\vacations\departments\(department_id):human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="19aa397d-362d-4187-a41f-1f9ce6dfc534" message="The api entered in the get:\vacations\departments\{department_id} flow."/>
 		
@@ -240,16 +310,6 @@ output application/json
     <flow name="get:\vacations:human-resources-api-config">
         <logger level="INFO" doc:name="Logger" doc:id="4bc2d556-2d9a-4859-887e-e6da8b4d94e2" message="The api entered in the get:\vacations flow."/>
 		<flow-ref doc:name="getVacations_Flow" doc:id="0af71183-7df9-4fa0-8f28-d16594fb6b91" name="getVacations_Flow"/>
-    </flow>
-	<flow name="get:\companies\(company_id):human-resources-api-config">
-		<logger level="INFO" doc:name="Logger" doc:id="14d2d383-e3e7-4755-94b7-21508fcaa871" message="The api entered in the get:\companies\{company_id} flow."/>
-		
-		<flow-ref doc:name="getCompanyById_Flow" doc:id="7fce8124-f074-419e-942f-3ebc1c10f164" name="getCompanyById_Flow"/>
-    </flow>
-    <flow name="get:\departments\(department_id):human-resources-api-config">
-		<logger level="INFO" doc:name="Logger" doc:id="092bf0c6-9824-4d4b-b714-d894ba7f3977" message="The api entered in the get:\departments\{department_id} flow."/>
-		
-		<flow-ref doc:name="getDepartmentById_Flow" doc:id="040808f9-7381-4567-bd62-5dcf8a244154" name="getDepartmentById_Flow"/>
     </flow>
     <flow name="get:\employees\(employee_id):human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="c06a9ac2-ae0f-4186-9f97-a496fde075cf" message="The api entered in the get:\employees\{employee_id} flow."/>
@@ -276,10 +336,6 @@ output application/json
 		
 		<flow-ref doc:name="postVacationByCompanyId_Flow" doc:id="fc211532-4abc-49ce-b4aa-36f51750531a" name="postVacationByCompanyId_Flow"/>
     </flow>
-    <flow name="post:\companies:application\json:human-resources-api-config">
-		<logger level="INFO" doc:name="Logger" doc:id="86e0ad99-3513-4dd5-aee6-6692c453966a" message="The api entered in the post:\companies flow."/>
-		<flow-ref doc:name="postCompanies_Flow" doc:id="9a56e776-3160-4ea0-b2dc-9658dc0545a8" name="postCompanies_Flow"/>
-    </flow>
     <flow name="post:\vacations\departments\(department_id):application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="a2cab703-455e-42d2-919d-68d0e7df0260" message="The api entered in the post:\vacations\departments\{department_id} flow."/>
 		
@@ -290,44 +346,9 @@ output application/json
 		
 		<flow-ref doc:name="postEmployeeByDepartmentId_Flow" doc:id="4436c555-b309-4f74-96d9-52e090bd218d" name="postEmployeeByDepartmentId_Flow"/>
     </flow>
-    <flow name="post:\departments:application\json:human-resources-api-config">
-		<logger level="INFO" doc:name="Logger" doc:id="50b088b6-4be2-40af-9f0f-8a13569f3c90" message="The api entered in the post:\departments flow."/>
-		<flow-ref doc:name="setPayload_Subflow" doc:id="461d0fbe-9356-43bd-aec5-891a2735feb8" name="setPayload_Subflow"/>
-		<choice doc:name="Choice" doc:id="20ebeddf-4e31-440b-93b6-51d2208078f0" >
-			<when expression='#[vars.varPayload == ""]'>
-				<ee:transform doc:name="Transform Message" doc:id="a2b99056-61d6-470e-9ac4-3f3a8709c973" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{
-	"message": "Request body is empty"
-}]]></ee:set-payload>
-					</ee:message>
-					<ee:variables >
-						<ee:set-variable variableName="httpStatus" ><![CDATA[411]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-			</when>
-			<otherwise >
-				<flow-ref doc:name="postDepartments_Flow" doc:id="70e7aab9-f5b8-42d4-8110-a2433ff8113c" name="postDepartments_Flow" />
-			</otherwise>
-		</choice>
-    </flow>
     <flow name="post:\vacations\employees\(employee_id):application\json:human-resources-api-config">
 		<logger level="INFO" doc:name="Logger" doc:id="4fe7fea5-1749-48fc-b70c-c4f439cf6610" message="The api entered in the post:\vacations\employees\{employee_id} flow."/>
 		
 		<flow-ref doc:name="postVacationByEmployeeId_Flow" doc:id="75d77243-1d07-496d-82da-25bbe5898c85" name="postVacationByEmployeeId_Flow"/>
     </flow>
-    <flow name="post:\employees:application\json:human-resources-api-config">
-		<logger level="INFO" doc:name="Logger" doc:id="bd06c018-1e1b-4a69-9cb0-f6f8b94b9de3" message="The api entered in the post:\employees flow."/>
-		<flow-ref doc:name="postEmployees_Flow" doc:id="169f9a67-cff3-4bc4-a855-a69182f3ad58" name="postEmployees_Flow"/>
-    </flow>
-    <flow name="post:\vacations:application\json:human-resources-api-config">
-		<logger level="INFO" doc:name="Logger" doc:id="4005ef14-96c1-4486-8fc4-d9c6c0867a46" message="The api entered in the post:\vacations flow."/>
-		<flow-ref doc:name="postVacations_Flow" doc:id="4364b6bd-6463-454e-b1d7-7fda99682cea" name="postVacations_Flow"/>
-    </flow>
-	<sub-flow name="setPayload_Subflow" doc:id="8784c085-2f9b-405e-8ae7-fc20cfab12a2" >
-		<set-variable value="#[payload]" doc:name="varPayload" doc:id="7e5bd8f5-9363-4f14-a9f8-67984484987b" variableName="varPayload"/>
-	</sub-flow>
 </mule>

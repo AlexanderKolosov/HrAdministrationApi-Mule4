@@ -7,7 +7,1244 @@
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-	
+	<sub-flow name="updateItem_Sub_Flow" doc:id="f97fc8ca-abd1-4597-956f-4525cc4431bb" >
+		<foreach doc:name="For Each" doc:id="c39db7a6-e849-46b1-b8d8-e32c0b2a5dc0" collection="#[payload]">
+			<set-variable value="UPDATE" doc:name="queryUpdate" doc:id="45b743d4-0390-4507-bc1e-742d94032235" variableName="queryUpdate" />
+			<set-variable value="SET " doc:name="querySet" doc:id="56a1e780-1809-4243-bdc9-5584b7f32f4d" variableName="querySet" />
+			<set-variable value="#[payload.key]" doc:name="keyValue" doc:id="2d431899-90a4-4551-bb02-d796e6d06fea" variableName="keyValue" />
+			<set-variable value="  = :value WHERE id = :id" doc:name="queryEndPart" doc:id="6f6a7798-02ce-447c-b83e-41f39b98e19a" variableName="queryEndPart" />
+			<db:update doc:name="Update" doc:id="955ab818-7a6d-4bc6-b58e-81cf28dabde2" config-ref="Database_Config">
+			<db:sql>#[vars.queryUpdate ++ ' ' ++ vars.tableName ++ ' ' ++ vars.querySet ++ ' ' ++ vars.keyValue ++ ' ' ++ vars.queryEndPart]</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'value': payload.value,
+	'id': vars.id.id
+}]]]></db:input-parameters>
+		</db:update>
+		</foreach>
+	</sub-flow>
+	<sub-flow name="createDepartment_Sub_Flow" doc:id="5ed31159-3396-425c-ba77-84276bd3c03b" >
+		<flow-ref doc:name="setBaseUri_Sub_Flow" doc:id="6f170ef0-4cfd-4144-8f70-57e645ed28ef" name="setBaseUri_Sub_Flow" />
+		<ee:transform doc:name="Transform Message" doc:id="36b35c8d-3d78-4d09-84bf-6c3f78d75cf4">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	name: payload.name,
+	companyId: payload.companyId,
+	creationDate: now() as DateTime {format: "yyyy-MM-dd HH:mm:ss.SSS"}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="setDateAndTime_Sub_Flow" doc:id="25b25c82-eaad-4415-a5c6-1e07d7843487" name="setDateAndTime_Sub_Flow" />
+		<db:insert doc:name="Insert" doc:id="215983fa-cbb4-44f8-9b8c-42692df27f26" config-ref="Database_Config">
+			<db:sql>INSERT INTO department(name, company_id, creation_date)
+VALUES(:name, :id, :creationDate)
+
+</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'name': payload.name,
+	'id': payload.companyId,
+	'creationDate': payload.creationDate
+}]]]></db:input-parameters>
+		</db:insert>
+		<db:select doc:name="Select" doc:id="06b7ef7f-8792-4e91-9761-e85c01026dc3" config-ref="Database_Config">
+			<db:sql>SELECT * 
+FROM department
+WHERE creation_date = :date</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'date': vars.dateAndTime
+}]]]></db:input-parameters>
+		</db:select>
+		<flow-ref doc:name="setOutboundHeaderCreatedObjectUrl_Sub_Flow" doc:id="69a9ca39-9d01-46e0-b636-f644fd4ae37c" name="setOutboundHeaderCreatedObjectUrl_Sub_Flow" />
+		<set-payload value="#['Department ' ++ payload[0].name ++ ' created successfully']" doc:name="Set Payload" doc:id="bdd53af8-b401-4bc8-b1af-ac0129b2d624" />
+	</sub-flow>
+	<sub-flow name="createEmployee_Sub_Flow" doc:id="58f8b0af-3cee-42b2-affd-a7d154fbf00e" >
+		<flow-ref doc:name="setBaseUri_Sub_Flow" doc:id="aa8a5a9c-57f7-4d4f-b38b-914c76ae5371" name="setBaseUri_Sub_Flow" />
+		<ee:transform doc:name="Transform Message" doc:id="d3a4d146-5bd3-4b49-8d15-280425b48d46">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	firstName: payload.firstName,
+	lastName: payload.lastName,
+	age: payload.age,
+	passportNumber: payload.passportNumber,
+	phoneNumber: payload.phoneNumber,
+	address: payload.address,
+	companyId: payload.companyId,
+	departmentId: payload.departmentId,
+	position: payload.position,
+	login: payload.login,
+	password: payload.password,
+	roles: payload.roles,
+	creationDate: now() as DateTime {format: "yyyy-MM-dd HH:mm:ss.SSS"}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="setDateAndTime_Sub_Flow" doc:id="552b542d-e7f5-4bbd-9386-02e73c4c1739" name="setDateAndTime_Sub_Flow" />
+		<db:insert doc:name="Insert" doc:id="efa42a8a-03f0-47f0-a23c-abde697ca5c9" config-ref="Database_Config">
+			<db:sql>INSERT INTO employee(first_name, last_name, address, age, company_id, department_id, password, login, passport_number, phone_number, position, creation_date, roles)
+VALUES(:first_name, :last_name, :address, :age, :company_id, :department_id, :password, :login, :passport_number, :phone_number, :position, :creation_date, :roles)
+</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'first_name': payload.firstName, 
+	'last_name': payload.lastName, 
+	'address': payload.address, 
+	'age': payload.age, 
+	'company_id': payload.companyId, 
+	'department_id': payload.departmentId, 
+	'password': payload.password, 
+	'login': payload.login, 
+	'passport_number': payload.passportNumber, 
+	'phone_number': payload.phoneNumber, 
+	'position': payload.position, 
+	'creation_date': payload.creationDate, 
+	'roles': payload.roles
+}]]]></db:input-parameters>
+		</db:insert>
+		<db:select doc:name="Select" doc:id="60770b32-5f1d-4c8a-b786-ae3488d351ea" config-ref="Database_Config">
+			<db:sql>SELECT * 
+FROM employee
+WHERE creation_date = :date</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'date': vars.dateAndTime
+}]]]></db:input-parameters>
+		</db:select>
+		<flow-ref doc:name="setOutboundHeaderCreatedObjectUrl_Sub_Flow" doc:id="d0b83a85-8eb7-49a1-88c3-e72422b1e16f" name="setOutboundHeaderCreatedObjectUrl_Sub_Flow" />
+		<set-payload value="#['Employee ' ++ payload[0].first_name ++ ' ' ++ payload[0].last_name ++ ' created successfully']" doc:name="Set Payload" doc:id="279f5c9d-de8d-441e-a600-5b588b6371b9" />
+	</sub-flow>
+	<sub-flow name="createVacation_Sub_Flow" doc:id="55a8096c-24cc-4d48-b476-51af5b9191c5" >
+		<flow-ref doc:name="setBaseUri_Sub_Flow" doc:id="b6e902d2-dcd6-4e71-b9ce-946fd292ef04" name="setBaseUri_Sub_Flow" />
+		<ee:transform doc:name="Transform Message" doc:id="450237e7-6c55-497d-a840-212f2676573a">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	employeeId: payload.employeeId,
+	companyId: payload.companyId,
+	departmentId: payload.departmentId,
+	startDate: payload.startDate,
+	periodOfDays: payload.periodOfDays,
+	status: 'In process',
+	creationDate: now() as DateTime {format: "yyyy-MM-dd HH:mm:ss.SSS"}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="setDateAndTime_Sub_Flow" doc:id="56c4dcee-9f7a-48ea-a651-6e27f9eacb1f" name="setDateAndTime_Sub_Flow" />
+		<db:insert doc:name="Insert" doc:id="bcf8d85d-9845-41a6-8d87-f7314f8bb2e7" config-ref="Database_Config">
+			<db:sql>INSERT INTO vacation(company_id, creation_date, department_id, employee_id, period_of_days, start_vacation_date, status)
+VALUES(:company_id, :creation_date, :department_id, :employee_id, :period_of_days, :start_vacation_date, :status)</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'company_id': payload.companyId, 
+	'creation_date': payload.creationDate, 
+	'department_id': payload.departmentId, 
+	'employee_id': payload.employeeId, 
+	'period_of_days': payload.periodOfDays, 
+	'start_vacation_date': payload.startDate, 
+	'status': payload.status
+}]]]></db:input-parameters>
+		</db:insert>
+		<db:select doc:name="Select" doc:id="a4a084f9-c29b-44f8-b5a6-d99fdf000650" config-ref="Database_Config">
+			<db:sql>SELECT * 
+FROM vacation
+WHERE creation_date = :date</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'date': vars.dateAndTime
+}]]]></db:input-parameters>
+		</db:select>
+		<flow-ref doc:name="setOutboundHeaderCreatedObjectUrl_Sub_Flow" doc:id="51155e68-e743-4d10-9638-c67db3504b0d" name="setOutboundHeaderCreatedObjectUrl_Sub_Flow" />
+		<set-payload value="Vacation created successfully" doc:name="Set Payload" doc:id="4654f942-535d-4ff0-9e4a-ae1fff59acec" />
+	</sub-flow>
+	<flow name="postCompanies_Flow" doc:id="9d3f8ecd-45c1-4624-ba95-9d8214b6d4b9">
+		<flow-ref doc:name="setBaseUri_Sub_Flow" doc:id="6c1f16a1-078a-4dc4-83a3-6063d85bf025" name="setBaseUri_Sub_Flow" />
+		<ee:transform doc:name="Transform Message" doc:id="50a1f1a6-4321-4802-91e4-c1f562aca292">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	name: payload.name,
+	creationDate: now() as DateTime {format: "yyyy-MM-dd HH:mm:ss.SSS"}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="setDateAndTime_Sub_Flow" doc:id="8267c877-7ff3-40d2-9591-762529ba65a9" name="setDateAndTime_Sub_Flow" />
+		<db:insert doc:name="Insert" doc:id="d49a7817-9b8b-4aec-a41a-efecd305af58" config-ref="Database_Config">
+			<db:sql>INSERT INTO company(name, creation_date)
+VALUES(:name, :creationDate)</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'name': payload.name,
+	'creationDate': payload.creationDate
+}]]]></db:input-parameters>
+		</db:insert>
+		<db:select doc:name="Select" doc:id="fca96119-8766-475c-9aaa-18cce2982e42" config-ref="Database_Config">
+			<db:sql>SELECT * 
+FROM company
+WHERE creation_date = :date</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'date': vars.dateAndTime
+}]]]></db:input-parameters>
+		</db:select>
+		<flow-ref doc:name="setOutboundHeaderCreatedObjectUrl_Sub_Flow" doc:id="d4308c3f-c86e-4696-9ca3-4c22b63b214b" name="setOutboundHeaderCreatedObjectUrl_Sub_Flow" />
+		<set-payload value="#['Company ' ++ payload[0].name ++ ' created successfully']" doc:name="Set Payload" doc:id="ce413b80-0f67-4407-bab2-e42b8e62b27d" />
+		<logger level="INFO" doc:name="Logger" doc:id="628806d3-2bd5-45a7-bd9c-7193f1d5350b" message="#[payload]" />
+	</flow>
+	<flow name="postDepartments_Flow" doc:id="efc057e5-21e5-4f64-87cc-331a11a1d0c4">
+		<flow-ref doc:name="createDepartment_Sub_Flow" doc:id="086886a7-a616-4aac-a795-293ae0eb0c92" name="createDepartment_Sub_Flow" />
+		<logger level="INFO" doc:name="Logger" doc:id="d5decd64-66a4-4298-a4b2-0de08313c82b" message="#[payload]" />
+	</flow>
+	<flow name="postDepartmentByCompanyId_Flow" doc:id="45009723-f193-47ce-836a-add1c38de713">
+		<flow-ref doc:name="setCompanyId_Sub_Flow" doc:id="1ed2617a-9544-40cd-85b0-395d8aa3a528" name="setCompanyId_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="73951c43-a78a-43fb-a386-276df3ba81a0" config-ref="Database_Config">
+			<db:sql>SELECT * 
+FROM company 
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.companyId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="7ecdb432-b3ff-4c6f-b85c-4c2137e8ea88">
+			<when expression="#[payload.id[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="2e8ba471-79e5-4125-802b-3bae51095842">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Company with id = " ++ vars.companyId ++ " not found in DB"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<flow-ref doc:name="createDepartment_Sub_Flow" doc:id="1c91d674-59a7-45ae-92d1-236a5ad557aa" name="createDepartment_Sub_Flow" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="9740de7b-5a83-4317-ba39-e97fa7db24ae" message="#[payload]" />
+	</flow>
+	<flow name="postEmployees_Flow" doc:id="33dd9d90-94ec-41d0-90f7-99124cdcac80">
+		<flow-ref doc:name="createEmployee_Sub_Flow" doc:id="68ef2cbd-6e74-4820-8a0a-caeec9370922" name="createEmployee_Sub_Flow" />
+		<logger level="INFO" doc:name="Logger" doc:id="622c0757-d22c-4239-a825-fc659dd39142" message="#[payload]" />
+	</flow>
+	<flow name="postEmployeeByCompanyId_Flow" doc:id="de7b5a7d-fe41-4261-9f4d-4d5b98736127">
+		<flow-ref doc:name="setCompanyId_Sub_Flow" doc:id="004f53b2-1e24-4f8d-b9ab-a930872723ed" name="setCompanyId_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="7f7ea655-fb3e-4886-8d6f-bdaf7e059b22" config-ref="Database_Config">
+			<db:sql>SELECT * 
+FROM company 
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.companyId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="c1a423a3-1899-4d9f-9e83-c26ecb72f47d">
+			<when expression="#[payload.id[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="7cb60970-9bc8-4b19-99b6-844eca5c66c5">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Company with id = " ++ vars.companyId ++ " not found in DB"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<flow-ref doc:name="createEmployee_Sub_Flow" doc:id="5c387023-886b-4402-a2b8-9cdaa1b5d4a2" name="createEmployee_Sub_Flow" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="16d62c8f-503f-4dc4-b6e0-757f47010646" message="#[payload]" />
+	</flow>
+	<flow name="postEmployeeByDepartmentId_Flow" doc:id="30af0867-e7fb-4812-86c0-0b1bb8f2cb1a">
+		<flow-ref doc:name="setDepartmentId_Sub_Flow" doc:id="7454eece-dded-4072-b511-cf4b5d7378da" name="setDepartmentId_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="5c4c6696-5977-4540-b294-087e4eeb441e" config-ref="Database_Config">
+			<db:sql>SELECT *
+FROM department
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.departmentId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="49ff8c38-03eb-4182-aee6-22900ee75b7e">
+			<when expression="#[payload.id[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="dd49c043-8a0f-48ba-a221-4e3a1ba15567">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Department with id = " ++ vars.departmentId ++ " not found in DB"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<flow-ref doc:name="createEmployee_Sub_Flow" doc:id="2da6a462-7679-4bbc-b438-07eba3bff679" name="createEmployee_Sub_Flow" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="fa9ea587-8caa-4a83-89b6-3bfa961c6bd7" message="#[payload]" />
+	</flow>
+	<flow name="postVacations_Flow" doc:id="9f2e88af-1144-465d-9eb9-493509103433">
+		<flow-ref doc:name="createVacation_Sub_Flow" doc:id="484bd0c5-2ea8-4791-a52e-e3da4763ac72" name="createVacation_Sub_Flow" />
+		<logger level="INFO" doc:name="Logger" doc:id="193df34b-23f3-4653-a0a9-1a185e9d3aa4" message="#[payload]" />
+	</flow>
+	<flow name="postVacationByCompanyId_Flow" doc:id="cd4238dd-f49c-48ef-8edb-2be467fa6a76">
+		<flow-ref doc:name="setCompanyId_Sub_Flow" doc:id="8357a163-0cc1-4683-a124-958599327a75" name="setCompanyId_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="07ae501a-54e8-408f-a514-d98a0841b5e0" config-ref="Database_Config">
+			<db:sql>SELECT * 
+FROM company 
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.companyId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="77de1ea9-3e71-44d1-8af8-14a6b944a3ce">
+			<when expression="#[payload.id[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="bb09f38c-c3ef-4877-a3e2-2f9db80b37ec">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Company with id = " ++ vars.companyId ++ " not found in DB"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<flow-ref doc:name="createVacation_Sub_Flow" doc:id="d8ddda9e-e0fa-4266-9ad0-c9f161053154" name="createVacation_Sub_Flow" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="921b5120-419e-4fd7-8e35-b221759b20b6" message="#[payload]" />
+	</flow>
+	<flow name="postVacationByDepartmentId_Flow" doc:id="9534688a-9c1f-4a8c-8c81-323f49c46763">
+		<flow-ref doc:name="setDepartmentId_Sub_Flow" doc:id="96e6011a-9d99-4e47-acd5-5765f91f0404" name="setDepartmentId_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="216a992b-5158-4ffe-8702-1b3cd2fe3e86" config-ref="Database_Config">
+			<db:sql>SELECT *
+FROM department
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.departmentId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="cd27ca8f-95e8-40ad-a1e7-373a06b133a7">
+			<when expression="#[payload.id[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="559ff8d4-065a-48c8-970d-f2d957e46eac">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Department with id = " ++ vars.departmentId ++ " not found in DB"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<flow-ref doc:name="createVacation_Sub_Flow" doc:id="f2d268d4-68b6-4d99-bce1-ab2a91ae90e9" name="createVacation_Sub_Flow" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="1cdef9bb-8b72-4628-bfe6-ae4fdd2a0f4b" message="#[payload]" />
+	</flow>
+	<flow name="postVacationByEmployeeId_Flow" doc:id="fced0a26-a3a6-4cfa-8672-f69f8661fc5d">
+		<flow-ref doc:name="setEmployeeId_Sub_Flow" doc:id="efb4ae22-b580-44dc-b8d3-8cc7b9d0e6a8" name="setEmployeeId_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="b400292b-aa67-4e8e-83fd-c5dba332d0b7" config-ref="Database_Config" >
+			<db:sql >SELECT *
+FROM employee
+WHERE id =:id</db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	'id': vars.employeeId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="91120fba-6b86-4a53-8a62-5a1d14c4f071" >
+			<when expression="#[payload.id[0] == null]" >
+				<ee:transform doc:name="Transform Message" doc:id="8544f26c-1340-4166-ae46-9ed5981a8f2d" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Employee with id = " ++ vars.employeeId ++ " not found in DB"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<flow-ref doc:name="createVacation_Sub_Flow" doc:id="f4d918ca-371c-4e9d-8e87-dfa157975700" name="createVacation_Sub_Flow"/>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="fd641d22-192e-4f97-ae3d-c7d2efe95499" message="#[payload]" />
+	</flow>
+	<flow name="getCompanyById_Flow" doc:id="37745091-1016-483e-af33-f4671e2d5be8">
+		<flow-ref doc:name="setCompanyId_Sub_Flow" doc:id="005f06c4-05c6-4978-953b-b3e8f50a6552" name="setCompanyId_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="ace75bff-49a1-4bd0-875d-61adf5e92d6e" config-ref="Database_Config">
+			<db:sql>SELECT * 
+FROM company 
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.companyId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="0faf0803-f049-43f4-a2a1-b96c0a784a86">
+			<when expression="#[payload.id[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="8369b6fa-9bb4-46d4-bffd-b5354fd3c369">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Company with id = " ++ vars.companyId ++ " not found in DB"
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="4c138172-0bb6-48b3-8a1b-4110054256df">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: payload.id[0],
+	name: payload.name[0],
+	creationDate: payload.creation_date[0] as String
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="getDepartmentById_Flow" doc:id="44e72232-562e-482d-976b-7ac5427bd721">
+		<flow-ref doc:name="setDepartmentId_Sub_Flow" doc:id="e15e37d2-4708-4b21-b489-2a848da0d619" name="setDepartmentId_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="601f74fe-e7d2-42a7-8b8c-fdea4fc6440a" config-ref="Database_Config">
+			<db:sql>SELECT *
+FROM department
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.departmentId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="56ef031e-39d6-45b3-9643-b713b4d52e92">
+			<when expression="#[payload.id[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="32b2c2ad-10e5-4b79-b867-0de2f7068e3d">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Department with id = " ++ vars.departmentId ++ " not found in DB"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="a8e1cc18-8733-4c0a-af96-1f49394572d4">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: payload.id[0],
+	name: payload.name[0],
+	companyId: payload.company_id[0],
+	creationDate: payload.creation_date[0] as String
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="getDepartmentByCompanyId_Flow" doc:id="08f08216-146c-4c8f-8808-e60c0fc55909">
+		<flow-ref doc:name="setCompanyId_Sub_Flow" doc:id="d4c02d7c-f735-4f95-8b59-f194632b3504" name="setCompanyId_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="e8589458-e0f7-4895-8e63-f4c2d5c52599" config-ref="Database_Config">
+			<db:sql>SELECT *
+FROM department
+WHERE company_id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.companyId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="907c1e11-199c-4044-9991-fde2e2174dd2" >
+			<when expression="#[payload[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="be945279-81e3-41a1-9e70-3b360b486750">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Departments with companyId = " ++ vars.companyId ++ " not found in DB"
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="826f9af1-5271-4888-8abc-4792dc1e9a06">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01) -> {
+	id: payload01.id,
+	name: payload01.name,
+	companyId: payload01.company_id
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="getEmployeeById_Flow" doc:id="58f247a2-2090-4bef-bc13-99877e137aaf">
+		<flow-ref doc:name="setEmployeeId_Sub_Flow" doc:id="7bcc2df4-943d-478a-a812-7e5c5a986a50" name="setEmployeeId_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="3491f1d1-b0f3-4790-8c5b-290507cb6135" config-ref="Database_Config">
+			<db:sql>SELECT *
+FROM employee
+WHERE id =:id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.employeeId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="0b208c39-eb8e-44bb-beb9-014926cca12b">
+			<when expression="#[payload.id[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="c94dfc8e-e688-4d72-be66-dc306740d1b4">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Employee with id = " ++ vars.employeeId ++ " not found in DB"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="c1ebaa16-2f29-4100-a249-e46270d1797a">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: payload.id[0],
+	firstName: payload.first_name[0],
+	lastName: payload.last_name[0],
+	age: payload.age[0],
+	passportNumber: payload.passport_number[0],
+	phoneNumber: payload.phone_number[0],
+	address: payload.address[0],
+	companyId: payload.company_id[0],
+	departmentId: payload.department_id[0],
+	position: payload.position[0],
+	login: payload.login[0],
+	password: payload.password[0],
+	roles: payload.roles[0],
+	creationDate: payload.creation_date[0] as String
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="getEmployeeByCompanyId_Flow" doc:id="cb66231b-638e-4ec0-b379-814e25a52af6">
+		<flow-ref doc:name="setCompanyId_Sub_Flow" doc:id="6fd8ac69-d753-4287-8e54-8407f8070e97" name="setCompanyId_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="f9c54509-0da1-448c-bacd-c70057c42493" config-ref="Database_Config">
+			<db:sql>SELECT *
+FROM employee
+WHERE company_id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.companyId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="8c6b3913-c160-4f5b-8c57-dc8591bf7816" >
+			<when expression="#[payload[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="8d3e0505-6dca-4188-85aa-415facd38f37">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Employee with companyId = " ++ vars.companyId ++ " not found in DB"
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="420fc432-f32a-4199-bffe-03a4e4e45bcf">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.id,
+	firstName: payload01.first_name,
+	lastName: payload01.last_name,
+	companyId: payload01.company_id,
+	departmentId: payload01.department_id,
+	position: payload01.position
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="getEmployeesByDepartmentId_Flow" doc:id="e2acdc4f-0a61-4f9c-9a02-1be2c08cad67">
+		<flow-ref doc:name="setDepartmentId_Sub_Flow" doc:id="d84a71dc-3735-4afe-bd29-c371007664f0" name="setDepartmentId_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="0a8ab3fc-c26d-4684-81ae-6ba235abacb2" config-ref="Database_Config">
+			<db:sql>SELECT * 
+FROM employee 
+WHERE department_id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.departmentId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="616bad29-5e73-4149-8ee1-04195cbe5530" >
+			<when expression="#[payload[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="ba2281ef-2b63-49b9-b102-d186e4e3287a">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Employee with departmentId = " ++ vars.departmentId ++ " not found in DB"
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="76da8185-2945-46d2-8fe0-7217c81092bc">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.id,
+	firstName: payload01.first_name,
+	lastName: payload01.last_name,
+	companyId: payload01.company_id,
+	departmentId: payload01.department_id,
+	position: payload01.position
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="getVacationById_Flow" doc:id="905879ad-b574-4900-b02d-035b6834ee98">
+		<flow-ref doc:name="setVacationId_Sub_Flow" doc:id="d57318b6-3e3e-4b0c-b45a-f96b95578aaa" name="setVacationId_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="8fa44084-93c5-4d33-b933-686fb15cdf0c" config-ref="Database_Config">
+			<db:sql>SELECT * 
+FROM vacation
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.vacationId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="5a6ec202-d6ab-4bef-8851-ffbaf0d87344" >
+			<when expression="#[payload.id[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="f847bbd4-0702-43f5-86b7-b82ad59e3b5e">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Vacation with id = " ++ vars.vacationId ++ " not found in DB"
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="40c2b953-88b7-4c5a-94dc-fd66bba7abe4">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: payload.id[0],
+	employeeId: payload.employee_id[0],
+	companyId: payload.company_id[0],
+	departmentId: payload.department_id[0],
+	startDate: payload.start_vacation_date[0],
+	periodOfDays: payload.period_of_days[0],
+	status: payload.status[0],
+	creationDate: payload.creation_date[0] as String
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="getVacationByCompanyId_Flow" doc:id="52d1b3e1-8b21-40fc-9e71-792417442dc8">
+		<flow-ref doc:name="setCompanyId_Sub_Flow" doc:id="cb63bca6-5a0c-40b4-ab82-76fd4db07578" name="setCompanyId_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="6b38a7c3-db4b-4c62-a92e-5834114febca" config-ref="Database_Config">
+			<db:sql>SELECT * 
+FROM vacation 
+WHERE company_id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.companyId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="08ff49e3-51a3-4f98-aeca-08815c62032f" >
+			<when expression="#[payload[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="d3e604f4-b2ca-418a-ba9a-6be8c6f124e6">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Vacation with companyId = " ++ vars.companyId ++ " not found in DB"
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="4d0c1f2e-eec0-49fb-9420-86a18e631f00">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.id,
+	employeeId: payload01.employee_id,
+	companyId: payload01.company_id,
+	departmentId: payload01.department_id,
+	startDate: payload01.start_vacation_date,
+	periodOfDays: payload01.period_of_days,
+	status: payload01.status
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="getVacationsByDepartmentId_Flow" doc:id="f39bc042-724c-46f7-b0fd-6a0a1f8315cc">
+		<flow-ref doc:name="setDepartmentId_Sub_Flow" doc:id="9551a454-ca4c-476c-ab84-eeded4f91f4f" name="setDepartmentId_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="02431586-efd3-4988-922c-417f1e8b372f" config-ref="Database_Config">
+			<db:sql>SELECT * 
+FROM vacation 
+WHERE department_id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.departmentId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="8962dce0-0271-46a6-acee-f5d1d8b58ad8" >
+			<when expression="#[payload[0] == null]" >
+				<ee:transform doc:name="Transform Message" doc:id="61736157-aa07-4d1b-9ca8-910a760f4fb0" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Vacation with departmentId = " ++ vars.departmentId ++ " not found in DB"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="bee26cbb-882e-46a3-8c43-8fa7c39d723d">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.id,
+	employeeId: payload01.employee_id,
+	companyId: payload01.company_id,
+	departmentId: payload01.department_id,
+	startDate: payload01.start_vacation_date,
+	periodOfDays: payload01.period_of_days,
+	status: payload01.status
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="getVacationsByEmployeeId_Flow" doc:id="00718558-91f8-4d10-8ce7-8761adde58f0">
+		<flow-ref doc:name="setEmployeeId_Sub_Flow" doc:id="415e6324-d254-4bc3-8c1e-0c9842e364e5" name="setEmployeeId_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="886d73e9-7fb5-460a-8044-1bebf1ccc9de" config-ref="Database_Config">
+			<db:sql>SELECT * 
+FROM vacation 
+WHERE employee_id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.employeeId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="78576caa-eada-4e5f-91fe-34e4a477ecb4" >
+			<when expression="#[payload[0] == null]" >
+				<ee:transform doc:name="Transform Message" doc:id="d8b66c04-2894-4cca-b740-bbd3721ffbe0" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Vacation with employeeId = " ++ vars.employeeId ++ " not found in DB"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="f9a673ec-e76e-422c-917a-937814f028d5">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.id,
+	employeeId: payload01.employee_id,
+	companyId: payload01.company_id,
+	departmentId: payload01.department_id,
+	startDate: payload01.start_vacation_date,
+	periodOfDays: payload01.period_of_days,
+	status: payload01.status
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="patchCompanyById_Flow" doc:id="eaa6c749-2874-4261-8da2-c93bbd72943e">
+		<flow-ref doc:name="setCompanyId_Sub_Flow" doc:id="1b17418a-b611-41c9-9f3a-ace7d026ae06" name="setCompanyId_Sub_Flow" />
+		<flow-ref doc:name="savePayloadToVariable_Sub_Flow" doc:id="82f8ba80-b760-49fa-a21d-5f06b5ce8d17" name="savePayloadToVariable_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="a6fadaef-c5dd-4f03-89d2-1c3b73fddbba" config-ref="Database_Config">
+			<db:sql>SELECT * 
+FROM company
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.companyId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="6382a07f-f917-462d-9eed-cc368efc248f" >
+			<when expression="#[payload.id[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="b04f72fc-85a4-44df-ae59-e00629f4e60a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Company with id = " ++ vars.companyId ++ " not found in DB"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<flow-ref doc:name="setCompanyName_Sub_Flow" doc:id="852612a1-7730-43d8-9de0-195ab3cabf24" name="setCompanyName_Sub_Flow" />
+				<ee:transform doc:name="Transform Message" doc:id="d3944939-8a4f-4c92-8616-c506847a2c2c">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.payloadToVar pluck ( value, key ) -> {
+	key: key,
+	value: value
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="tableName"><![CDATA[%dw 2.0
+output text/plain
+---
+'company']]></ee:set-variable>
+						<ee:set-variable variableName="id" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: vars.companyId
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+				<flow-ref doc:name="updateItem_Sub_Flow" doc:id="8ae112b8-c7d7-4264-b14f-5bf755555494" name="updateItem_Sub_Flow" />
+				<set-payload value="#['Company ' ++ vars.companyName ++ ' modified successfully']" doc:name="Set Payload" doc:id="8c131779-88be-48ea-9ab8-285e6ec558ed" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="e88137f2-1dcc-4c5d-b211-4c5165b4d14c" message="#[payload]"/>
+	</flow>
+	<flow name="deleteCompanyById_Flow" doc:id="d4e34719-5cd7-4ab9-b56f-ddaa7c7bb457">
+		<flow-ref doc:name="setCompanyId_Sub_Flow" doc:id="efc9e9b2-0853-4898-acea-cd59388c0335" name="setCompanyId_Sub_Flow" />
+		<flow-ref doc:name="setHttpStatusTo200_Sub_Flow" doc:id="adbe5f80-c655-4862-b28a-d43d7ea31acb" name="setHttpStatusTo200_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="cf64db82-8f66-4cb9-b716-ac78e037b6d9" config-ref="Database_Config">
+			<db:sql>SELECT *
+FROM company
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.companyId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="32aacaa2-bbb0-4f6a-a46f-96d2e35e0311" >
+			<when expression="#[payload.id[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="addfb990-5f75-4494-b0a0-91d2d2e7c06e" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Company with id = " ++ vars.companyId ++ " not found in DB"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<flow-ref doc:name="setCompanyName_Sub_Flow" doc:id="c55fc44b-377b-498d-96ed-40fc8df89892" name="setCompanyName_Sub_Flow" />
+				<db:delete doc:name="Delete" doc:id="e8d72e24-c183-4376-b7e2-a9f657190b36" config-ref="Database_Config">
+			<db:sql>DELETE FROM company
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.companyId
+}]]]></db:input-parameters>
+		</db:delete>
+				<set-payload value="#['Company ' ++ vars.companyName ++ ' deleted successfully']" doc:name="Set Payload" doc:id="668b7e49-8569-4d71-8b14-6b1cb0573596" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="472bb42d-0cf1-4d1a-8b6e-c86d9af0d318" message="#[payload]" />
+	</flow>
+	<flow name="patchDepartmentById_Flow" doc:id="cdbcf3ea-7551-4af9-b979-392953b63e8a">
+		<flow-ref doc:name="setDepartmentId_Sub_Flow" doc:id="1d48e440-c858-42cb-add6-4e6f94e24462" name="setDepartmentId_Sub_Flow" />
+		<flow-ref doc:name="savePayloadToVariable_Sub_Flow" doc:id="92f63a2e-e94e-44fe-9e82-dc7f15047fbb" name="savePayloadToVariable_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="ac4d0753-5cda-41d9-87e8-c76c45a32beb" config-ref="Database_Config">
+			<db:sql>SELECT * 
+FROM department 
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.departmentId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="bd0e6891-9279-4857-9fa9-0a77346a2a17">
+			<when expression="#[payload.id[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="0f8d1580-257b-4024-8621-9d0ec939b87d">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Department with id = " ++ vars.departmentId ++ " not found in DB"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<flow-ref doc:name="setDepartmentName_Sub_Flow" doc:id="0dffecfa-1bc0-4537-aa7f-624b7329c2fa" name="setDepartmentName_Sub_Flow" />
+				<ee:transform doc:name="Transform Message" doc:id="49339d77-84d0-4b59-9e81-2501ae6c3bca">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.payloadToVar pluck ( value, key ) -> {
+	key: key,
+	value: value
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="tableName"><![CDATA[%dw 2.0
+output text/plain
+---
+'department']]></ee:set-variable>
+						<ee:set-variable variableName="id" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: vars.departmentId
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+				<flow-ref doc:name="updateItem_Sub_Flow" doc:id="fec6ecec-f17b-4b87-95f2-d0fcbb75505d" name="updateItem_Sub_Flow" />
+				<set-payload value="#['Department ' ++ vars.departmentName ++ ' modified successfully']" doc:name="Set Payload" doc:id="57fc49f1-d241-4f31-9efd-2682456add88" mimeType="application/json" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="58d00fe2-210a-4301-8e8f-f1bd08d5083f" message="#[payload]" />
+	</flow>
+	<flow name="deleteDepartmentById_Flow" doc:id="40234b5a-2427-474d-b09a-5130513c37b2">
+		<flow-ref doc:name="setDepartmentId_Sub_Flow" doc:id="475d62aa-2c88-4099-874a-bfd8a3982bb4" name="setDepartmentId_Sub_Flow" />
+		<flow-ref doc:name="setHttpStatusTo200_Sub_Flow" doc:id="b392c2f4-596b-45ff-b9ce-ce5db3d357cc" name="setHttpStatusTo200_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="d43ae250-1b4c-467d-bc28-7104f76e525b" config-ref="Database_Config">
+			<db:sql>SELECT *
+FROM department
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.departmentId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="560a14da-c13f-4edc-959e-2f58ad42ea03" >
+			<when expression="#[payload.id[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="5f2f6b61-9667-4e5e-aac6-48bbfcfa6dc8" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Department with id = " ++ vars.departmentId ++ " not found in DB"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<flow-ref doc:name="setDepartmentName_Sub_Flow" doc:id="2e4c1278-5b0c-4dcc-a3b1-4e7ff36e1f01" name="setDepartmentName_Sub_Flow" />
+				<db:delete doc:name="Delete" doc:id="703d179c-f263-4768-84b4-060f5ef47490" config-ref="Database_Config">
+			<db:sql>DELETE FROM department
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.departmentId
+}]]]></db:input-parameters>
+		</db:delete>
+				<set-payload value="#['Department ' ++ vars.departmentName ++ ' deleted successfully']" doc:name="Set Payload" doc:id="d909c7bb-e70e-4cad-b431-2efaef9d62e3" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="d1e26066-3ee0-4c92-9b9b-165b798aa4d4" message="#[payload]" />
+	</flow>
+	<flow name="patchEmployeeById_Flow" doc:id="bda3331e-8ca0-43a8-a06b-f96374d5709d">
+		<flow-ref doc:name="setEmployeeId_Sub_Flow" doc:id="dee00787-f2e8-4621-b2ff-02fa1527b5a8" name="setEmployeeId_Sub_Flow"/>
+		<flow-ref doc:name="savePayloadToVariable_Sub_Flow" doc:id="69af0889-9b62-4688-896c-badd22ce8689" name="savePayloadToVariable_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="c382b74f-d3f2-45cb-b6c6-869a67e8263d" config-ref="Database_Config">
+			<db:sql>SELECT * 
+FROM employee 
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.employeeId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="068887dd-0e1f-4c98-b8da-69e96c7269c4" >
+			<when expression="#[payload.id[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="31a16a8e-0cbe-4c21-8ba0-83577d9a1907" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Employee with id = " ++ vars.employeeId ++ " not found in DB"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<flow-ref doc:name="setEmployeeName_Sub_Flow" doc:id="84095a19-3c77-4abb-ba12-63be74a66747" name="setEmployeeName_Sub_Flow" />
+				<ee:transform doc:name="Transform Message" doc:id="106a1c7b-207c-44cb-8444-270b24dfdbca">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.payloadToVar pluck ( value, key ) -> {
+	key: key,
+	value: value
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="tableName"><![CDATA[%dw 2.0
+output text/plain
+---
+'employee']]></ee:set-variable>
+						<ee:set-variable variableName="id" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: vars.employeeId
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+				<flow-ref doc:name="updateItem_Sub_Flow" doc:id="0f49149a-8bd6-4994-9f24-6bd032eacb03" name="updateItem_Sub_Flow" />
+				<set-payload value="#['Employee ' ++ vars.employeeName ++ ' modified successfully']" doc:name="Set Payload" doc:id="0e052f0f-7373-477f-a6f0-c7fae68d513d" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="108f1bb1-c12b-4b22-bdc3-87a8e3eec57f" message="#[payload]"/>
+	</flow>
+	<flow name="deleteEmployeeById_Flow" doc:id="8f491c0e-d674-4d9e-89d3-6da667a12c88">
+		<flow-ref doc:name="setEmployeeId_Sub_Flow" doc:id="5119e8f8-db77-470d-a9cd-86fadbbf9e70" name="setEmployeeId_Sub_Flow" />
+		<flow-ref doc:name="setHttpStatusTo200_Sub_Flow" doc:id="4031e6f9-17a1-446c-8e27-78f73a47f981" name="setHttpStatusTo200_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="f44a986a-7a39-4ca9-bebb-e9ffdf4e8c67" config-ref="Database_Config">
+			<db:sql>SELECT *  
+FROM employee
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.employeeId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="be80ad99-e9ea-4d34-989b-a9be457e63a3" >
+			<when expression="#[payload.id[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="80a60499-d37b-4b1b-9e8a-5f793cafc9c3" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Employee with id = " ++ vars.employeeId ++ " not found in DB"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<flow-ref doc:name="setEmployeeName_Sub_Flow" doc:id="8de2c590-8161-43fe-8b11-484a58b5766a" name="setEmployeeName_Sub_Flow" />
+				<db:delete doc:name="Delete" doc:id="5e06458e-db76-4e8e-95dc-5f59261fd349" config-ref="Database_Config">
+			<db:sql>DELETE FROM employee
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.employeeId
+}]]]></db:input-parameters>
+		</db:delete>
+				<set-payload value="#['Employee ' ++ vars.employeeName ++ ' deleted successfully']" doc:name="Set Payload" doc:id="a310323c-ecc4-4ee6-b2b6-f6c3c8f0275f" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="9bca1892-ad78-4428-b9f2-a6be13dddb68" message="#[payload]" />
+	</flow>
+	<flow name="patchVacationById_Flow" doc:id="ca12c30e-8076-496f-b844-82d92918a42c">
+	<flow-ref doc:name="setVacationId_Sub_Flow" doc:id="2fe04bd8-2f13-43db-9836-5f65e20669d6" name="setVacationId_Sub_Flow" />
+		<flow-ref doc:name="savePayloadToVariable_Sub_Flow" doc:id="5c9fa561-e17c-43f9-a0b0-642a5e480ed2" name="savePayloadToVariable_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="648b9f35-b085-48c8-8ee2-ae5f122c5883" config-ref="Database_Config">
+			<db:sql>SELECT *
+FROM vacation
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.vacationId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="8ba98768-01e3-4001-b1bb-64702c8947a0" >
+			<when expression="#[payload.id[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="082d7d78-6cef-44a4-a3c5-1bae137dc37f" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Vacation with id = " ++ vars.vacationId ++ " not found in DB"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="b42435ea-9bc7-46ff-b271-ca679bdaaa06">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.payloadToVar pluck ( value, key ) -> {
+	key: key,
+	value: value
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="tableName"><![CDATA[%dw 2.0
+output text/plain
+---
+'vacation']]></ee:set-variable>
+						<ee:set-variable variableName="id" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: vars.vacationId
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+				<flow-ref doc:name="updateItem_Sub_Flow" doc:id="1b75bc6f-7310-46a7-9cd3-7872b6444911" name="updateItem_Sub_Flow" />
+				<set-payload value="#['Vacation modified successfully']" doc:name="Set Payload" doc:id="93442c6e-81ee-4410-b346-4e22a576a1e1" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="b901372a-e4db-4abc-a825-17c6271c6dad" message="#[payload]"/>
+	</flow>
+	<flow name="deleteVacationById_Flow" doc:id="c7daf674-ee6c-4105-800f-94ddf30e1050">
+		<flow-ref doc:name="setVacationId_Sub_Flow" doc:id="12d3602d-d23b-41ce-982d-716a6f6730cc" name="setVacationId_Sub_Flow" />
+		<flow-ref doc:name="setHttpStatusTo200_Sub_Flow" doc:id="e2e5a156-c290-46f4-84f3-2a9bb9da7733" name="setHttpStatusTo200_Sub_Flow" />
+		<db:select doc:name="Select" doc:id="52090928-77e2-4470-beff-b8ad5c5e69e4" config-ref="Database_Config">
+			<db:sql>SELECT *
+FROM vacation
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.vacationId
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="0725256a-6edf-49ee-a6fc-e492a3df3fbe" >
+			<when expression="#[payload.id[0] == null]">
+				<ee:transform doc:name="Transform Message" doc:id="6dad4273-ebea-4dca-b4b7-d5ebca459b5c" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Vacation with id = " ++ vars.vacationId ++ " not found in DB"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<db:delete doc:name="Delete" doc:id="699873f7-1479-427a-9b01-f8be1277f7e3" config-ref="Database_Config">
+			<db:sql>DELETE FROM vacation
+WHERE id = :id</db:sql>
+			<db:input-parameters><![CDATA[#[{
+	'id': vars.vacationId
+}]]]></db:input-parameters>
+		</db:delete>
+				<set-payload value="#['Vacation deleted successfully']" doc:name="Set Payload" doc:id="29459175-10b9-4330-9e69-3c08b687adba" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="a52c6aa4-afa1-48ef-948d-06c7c2b34b3f" message="#[payload]" />
+	</flow>
 	<flow name="getCompanies_Flow" doc:id="105dbf94-4ca5-4a90-9701-a9dd0dbd1112" >
 		<db:select doc:name="Select" doc:id="dee24bed-8975-4f91-a2cc-b9a443001f13" config-ref="Database_Config">
 			<db:sql >SELECT * 
@@ -24,83 +1261,6 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-	</flow>
-	<flow name="postCompanies_Flow" doc:id="9d3f8ecd-45c1-4624-ba95-9d8214b6d4b9" >
-		<ee:transform doc:name="Transform Message" doc:id="50a1f1a6-4321-4802-91e4-c1f562aca292" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{
-	name: payload.name,
-	creationDate: now() as Date
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<flow-ref doc:name="setCompanyName_Subflow" doc:id="8380b24b-6695-42d1-b40a-5fc3f3e9a9a1" name="setCompanyName_Subflow"/>
-		<db:insert doc:name="Insert" doc:id="d49a7817-9b8b-4aec-a41a-efecd305af58" config-ref="Database_Config">
-			<db:sql >INSERT INTO company(name, creation_date)
-VALUES(:name, :creationDate)</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'name': vars.companyName,
-	'creationDate': payload.creationDate
-}]]]></db:input-parameters>
-		</db:insert>
-		<set-payload value="#['Company ' ++ vars.companyName ++ ' was created successfully']" doc:name="Set Payload" doc:id="ce413b80-0f67-4407-bab2-e42b8e62b27d" />
-	</flow>
-	<flow name="getCompanyById_Flow" doc:id="37745091-1016-483e-af33-f4671e2d5be8" >
-		<flow-ref doc:name="setCompanyId_Subflow" doc:id="005f06c4-05c6-4978-953b-b3e8f50a6552" name="setCompanyId_Subflow"/>
-		<db:select doc:name="Select" doc:id="ace75bff-49a1-4bd0-875d-61adf5e92d6e" config-ref="Database_Config">
-			<db:sql >SELECT * 
-FROM company 
-WHERE id = :id</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'id': vars.companyId
-}]]]></db:input-parameters>
-		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="4c138172-0bb6-48b3-8a1b-4110054256df">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-	id: payload.id,
-	name: payload.name,
-	creationDate: payload.creationDate as String
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-	</flow>
-	<flow name="putCompanyById_Flow" doc:id="eaa6c749-2874-4261-8da2-c93bbd72943e">
-		<flow-ref doc:name="setCompanyId_Subflow" doc:id="1b17418a-b611-41c9-9f3a-ace7d026ae06" name="setCompanyId_Subflow"/>
-		<flow-ref doc:name="setCompanyName_Subflow" doc:id="852612a1-7730-43d8-9de0-195ab3cabf24" name="setCompanyName_Subflow"/>
-		<db:update doc:name="Update" doc:id="00982528-7158-40b5-8c22-08a93027fd84" config-ref="Database_Config">
-			<db:sql>UPDATE company SET name = :name WHERE id = :id</db:sql>
-			<db:input-parameters >#[{'name': vars.companyName,
-'id': vars.companyId}]</db:input-parameters>
-		</db:update>
-		<set-payload value="#['Company ' ++ vars.companyName ++ ' was modified successfully']" doc:name="Set Payload" doc:id="8c131779-88be-48ea-9ab8-285e6ec558ed" />
-	</flow>
-	<flow name="deleteCompanyById_Flow" doc:id="d4e34719-5cd7-4ab9-b56f-ddaa7c7bb457" >
-		<flow-ref doc:name="setCompanyId_Subflow" doc:id="efc9e9b2-0853-4898-acea-cd59388c0335" name="setCompanyId_Subflow"/>
-		<flow-ref doc:name="setHttpStatusTo200_Subflow" doc:id="adbe5f80-c655-4862-b28a-d43d7ea31acb" name="setHttpStatusTo200_Subflow"/>
-		<db:select doc:name="Select" doc:id="cf64db82-8f66-4cb9-b716-ac78e037b6d9" config-ref="Database_Config">
-			<db:sql >SELECT name 
-FROM company
-WHERE id = :id</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'id': vars.companyId
-}]]]></db:input-parameters>
-		</db:select>
-		<flow-ref doc:name="setCompanyName_Subflow" doc:id="c55fc44b-377b-498d-96ed-40fc8df89892" name="setCompanyName_Subflow"/>
-		<db:delete doc:name="Delete" doc:id="e8d72e24-c183-4376-b7e2-a9f657190b36" config-ref="Database_Config">
-			<db:sql >DELETE FROM company
-WHERE id = :id</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'id': vars.companyId
-}]]]></db:input-parameters>
-		</db:delete>
-		<set-payload value="#['Company ' ++ vars.companyName[0] ++ ' was deleted successfully']" doc:name="Set Payload" doc:id="668b7e49-8569-4d71-8b14-6b1cb0573596" />
 	</flow>
 	<flow name="getDepartments_Flow" doc:id="0ccd9795-700f-4f56-9930-f5cc0056121c" >
 		<db:select doc:name="Select" doc:id="a2261b11-3857-4004-afb6-10c22aa1580b" config-ref="Database_Config">
@@ -119,228 +1279,6 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-	</flow>
-	<flow name="postDepartments_Flow" doc:id="efc057e5-21e5-4f64-87cc-331a11a1d0c4" >
-		<flow-ref doc:name="setBaseUri_Subflow" doc:id="2a5e5906-6fdb-4133-9eca-efffc20bcb33" name="setBaseUri_Subflow"/>
-		<ee:transform doc:name="Transform Message" doc:id="107867fc-474d-4195-b16d-34c81f6ee51a" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{
-	name: payload.name,
-	companyId: payload.companyId,
-	creationDate: now() as DateTime {format: "yyyy-MM-dd HH:mm:ss.SSS"}
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<flow-ref doc:name="setDateAndTime_Subflow" doc:id="47eb52d9-79d1-41f2-9b73-c3193a1e92e2" name="setDateAndTime_Subflow" />
-		<flow-ref doc:name="setDepartmentName_Subflow" doc:id="31051a51-ec24-4374-b48b-9fe7a5a31620" name="setDepartmentName_Subflow"/>
-		<db:insert doc:name="Insert" doc:id="11c30909-974b-4e89-8b00-c03d3827c69c" config-ref="Database_Config">
-			<db:sql >INSERT INTO department(name, company_id, creation_date)
-VALUES(:name, :id, :creationDate)
-
-</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'name': vars.departmentName,
-	'id': payload.companyId,
-	'creationDate': payload.creationDate
-}]]]></db:input-parameters>
-		</db:insert>
-		<db:select doc:name="Select" doc:id="6b4053ee-907a-44ad-b973-1eea6b219f45" config-ref="Database_Config">
-			<db:sql >SELECT * 
-FROM department
-WHERE creation_date = :date</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'date': vars.dateAndTime
-}]]]></db:input-parameters>
-		</db:select>
-		<flow-ref doc:name="setId_Subflow" doc:id="600ffea9-5b4e-453d-8d87-14b42204cacc" name="setId_Subflow"/>
-		<ee:transform doc:name="Transform Message" doc:id="a24a09fc-589d-4cd7-a017-3dd0ab7d0f3b" >
-			<ee:message >
-			</ee:message>
-			<ee:variables >
-				<ee:set-variable variableName="outboundHeaders" ><![CDATA[%dw 2.0
-output application/json
----
-{
-	"created_item_uri": (vars.baseUri ++ "/" ++ vars.id)
-}]]></ee:set-variable>
-			</ee:variables>
-		</ee:transform>
-		<set-payload value="#['Department ' ++ vars.departmentName ++ ' was created successfully']" doc:name="Set Payload" doc:id="b34620ec-e0f4-4ce3-8461-1eaecbd2a508" />
-	</flow>
-	<flow name="getDepartmentById_Flow" doc:id="44e72232-562e-482d-976b-7ac5427bd721" >
-		<flow-ref doc:name="setDepartmentId_Subflow" doc:id="e15e37d2-4708-4b21-b489-2a848da0d619" name="setDepartmentId_Subflow"/>
-		<db:select doc:name="Select" doc:id="601f74fe-e7d2-42a7-8b8c-fdea4fc6440a" config-ref="Database_Config">
-			<db:sql >SELECT *
-FROM department
-WHERE id = :id</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'id': vars.departmentId
-}]]]></db:input-parameters>
-		</db:select>
-		<choice doc:name="Choice" doc:id="56ef031e-39d6-45b3-9643-b713b4d52e92" >
-			<when expression="#[payload.name[0] == null]">
-				<ee:transform doc:name="Transform Message" doc:id="32b2c2ad-10e5-4b79-b867-0de2f7068e3d" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{
-	"message": "Department with id = " ++ vars.departmentId ++ " is not found in DB"
-}]]></ee:set-payload>
-					</ee:message>
-					<ee:variables >
-						<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
-					</ee:variables>
-				</ee:transform>
-			</when>
-			<otherwise >
-				<ee:transform doc:name="Transform Message" doc:id="a8e1cc18-8733-4c0a-af96-1f49394572d4">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-	id: payload.id[0],
-	name: payload.name[0],
-	companyId: payload.company_id[0],
-	creationDate: payload.creation_date[0] as String
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-			</otherwise>
-		</choice>
-	</flow>
-	<flow name="patchDepartmentById_Flow" doc:id="cdbcf3ea-7551-4af9-b979-392953b63e8a" >
-		<scatter-gather doc:name="Scatter-Gather" doc:id="251670bb-956e-4739-8fd6-b98384e2e501" >
-			<route >
-				<flow-ref doc:name="setDepartmentId_Subflow" doc:id="f0a5dfa2-6c08-481f-bd1e-4d7eccf591b3" name="setDepartmentId_Subflow" targetValue="#[message.attributes.uriParams.department_id]" />
-			</route>
-			<route >
-				<flow-ref doc:name="setDepartmentName_Subflow" doc:id="0dffecfa-1bc0-4537-aa7f-624b7329c2fa" name="setDepartmentName_Subflow" />
-			</route>
-			<route >
-				<flow-ref doc:name="setCompanyIdFromPayload_Subflow" doc:id="2a8bab78-466e-48be-a64d-4e7342ca61c5" name="setCompanyIdFromPayload_Subflow"/>
-			</route>
-		</scatter-gather>
-		<db:select doc:name="Select" doc:id="db027409-8901-43ac-a5f3-1aad00b6337e" config-ref="Database_Config">
-			<db:sql >SELECT *
-FROM department
-WHERE id = :id</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'id': vars.departmentId
-}]]]></db:input-parameters>
-		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="140db5d7-a113-4d57-aa5e-c3141a48eefb" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{
-	name: payload.name[0],
-	companyId: payload.company_id[0]
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<scatter-gather doc:name="Scatter-Gather" doc:id="6c77957c-cf08-45f3-8547-05fe6dbe5b30" >
-			<route >
-				<choice doc:name="Choice" doc:id="ab84f223-19f3-4e5c-84fc-12d48d1b3bf5">
-					<when expression="#[vars.companyId == null]">
-						<flow-ref doc:name="setCompanyIdFromPayload_Subflow" doc:id="e3977451-6004-448f-b306-c777f6858466" name="setCompanyIdFromPayload_Subflow" />
-			</when>
-		</choice>
-			</route>
-			<route >
-				<choice doc:name="Choice" doc:id="64fb5b3b-cf82-40e5-aaa6-bc0a52c095b4">
-			<when expression="#[vars.departmentName == null]">
-						<flow-ref doc:name="setDepartmentName_Subflow" doc:id="abf55a5e-e4a8-40e8-8005-c551fb7ec086" name="setDepartmentName_Subflow" />
-			</when>
-		</choice>
-			</route>
-		</scatter-gather>
-		<db:update doc:name="Update" doc:id="499acb00-d036-4e5e-aef2-3e2fd2696b52" config-ref="Database_Config">
-			<db:sql>UPDATE department SET name = :name, company_id = :company_id WHERE id = :id</db:sql>
-			<db:input-parameters><![CDATA[#[{
-	'name': vars.departmentName,
-	'company_id': vars.companyId,
-	'id': vars.departmentId
-}]]]></db:input-parameters>
-		</db:update>
-		<set-payload value="#['Department ' ++ vars.departmentName ++ ' was modified successfully']" doc:name="Set Payload" doc:id="57fc49f1-d241-4f31-9efd-2682456add88" mimeType="application/json"/>
-	</flow>
-	<flow name="deleteDepartmentById_Flow" doc:id="40234b5a-2427-474d-b09a-5130513c37b2">
-		<flow-ref doc:name="setDepartmentId_Subflow" doc:id="475d62aa-2c88-4099-874a-bfd8a3982bb4" name="setDepartmentId_Subflow"/>
-		<flow-ref doc:name="setHttpStatusTo200_Subflow" doc:id="b392c2f4-596b-45ff-b9ce-ce5db3d357cc" name="setHttpStatusTo200_Subflow"/>
-		<db:select doc:name="Select" doc:id="d43ae250-1b4c-467d-bc28-7104f76e525b" config-ref="Database_Config">
-			<db:sql>SELECT name 
-FROM department
-WHERE id = :id</db:sql>
-			<db:input-parameters><![CDATA[#[{
-	'id': vars.departmentId
-}]]]></db:input-parameters>
-		</db:select>
-		<flow-ref doc:name="setDepartmentName_Subflow" doc:id="2e4c1278-5b0c-4dcc-a3b1-4e7ff36e1f01" name="setDepartmentName_Subflow"/>
-		<db:delete doc:name="Delete" doc:id="703d179c-f263-4768-84b4-060f5ef47490" config-ref="Database_Config">
-			<db:sql>DELETE FROM department
-WHERE id = :id</db:sql>
-			<db:input-parameters><![CDATA[#[{
-	'id': vars.departmentId
-}]]]></db:input-parameters>
-		</db:delete>
-		<set-payload value="#['Department ' ++ vars.departmentName[0] ++ ' was deleted successfully']" doc:name="Set Payload" doc:id="d909c7bb-e70e-4cad-b431-2efaef9d62e3" />
-	</flow>
-	<flow name="getDepartmentByCompanyId_Flow" doc:id="08f08216-146c-4c8f-8808-e60c0fc55909" >
-		<flow-ref doc:name="setCompanyId_Subflow" doc:id="d4c02d7c-f735-4f95-8b59-f194632b3504" name="setCompanyId_Subflow"/>
-		<db:select doc:name="Select" doc:id="e8589458-e0f7-4895-8e63-f4c2d5c52599" config-ref="Database_Config">
-			<db:sql >SELECT *
-FROM department
-WHERE company_id = :id</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'id': vars.companyId
-}]]]></db:input-parameters>
-		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="826f9af1-5271-4888-8abc-4792dc1e9a06" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-payload map ( payload01 , indexOfPayload01 ) -> {
-	id: payload01.id,
-	name: payload01.name,
-	companyId: payload01.company_id
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-	</flow>
-	<flow name="postDepartmentByCompanyId_Flow" doc:id="45009723-f193-47ce-836a-add1c38de713" >
-		<flow-ref doc:name="setCompanyId_Subflow" doc:id="e46e51f0-1301-4d11-88a8-7681996dd0ae" name="setCompanyId_Subflow"/>
-		<ee:transform doc:name="Transform Message" doc:id="16717a80-23bb-4398-b0af-202ec404f9ba" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{
-	name: payload.name,
-	companyId: vars.companyId,
-	creationDate: now() as Date
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<flow-ref doc:name="setDepartmentName_Subflow" doc:id="7c1ebfd0-c43a-46c4-8f42-ab0461a5abfd" name="setDepartmentName_Subflow"/>
-		<db:insert doc:name="Insert" doc:id="215983fa-cbb4-44f8-9b8c-42692df27f26" config-ref="Database_Config">
-			<db:sql >INSERT INTO department(name, company_id, creation_date)
-VALUES(:name, :id, :creationDate)
-
-</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'name': vars.departmentName,
-	'id': vars.companyId,
-	'creationDate': payload.creationDate
-}]]]></db:input-parameters>
-		</db:insert>
-		<set-payload value="#['Department ' ++ vars.departmentName ++ ' was created successfully']" doc:name="Set Payload" doc:id="bdd53af8-b401-4bc8-b1af-ac0129b2d624" />
 	</flow>
 	<flow name="getEmployees_Flow" doc:id="dc259574-8d4f-4454-8f8a-2d25472262f6" >
 		<db:select doc:name="Select" doc:id="24ef28bd-fbbe-42af-a072-7f7bf549bc9f" config-ref="Database_Config">
@@ -362,298 +1300,6 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-	</flow>
-	<flow name="postEmployees_Flow" doc:id="33dd9d90-94ec-41d0-90f7-99124cdcac80" >
-		<ee:transform doc:name="Transform Message" doc:id="b06be82d-9fe4-4d9f-b841-fb6c63d542b7" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
----
-{
-	firstName: payload.firstName,
-	lastName: payload.lastName,
-	age: payload.age,
-	passportNumber: payload.passportNumber,
-	phoneNumber: payload.phoneNumber,
-	address: payload.address,
-	companyId: payload.companyId,
-	departmentId: payload.departmentId,
-	position: payload.position,
-	login: payload.login,
-	password: payload.password,
-	roles: payload.roles,
-	creationDate: now() as Date
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<flow-ref doc:name="setEmployeeName_Subflow" doc:id="3ab3885d-63fa-4e78-91db-89ac2c493422" name="setEmployeeName_Subflow"/>
-		<db:insert doc:name="Insert" doc:id="64828e46-bf56-4391-9588-1093a736631f" config-ref="Database_Config">
-			<db:sql >INSERT INTO employee(first_name, last_name, address, age, company_id, department_id, password, login, passport_number, phone_number, position, creation_date, roles)
-VALUES(:first_name, :last_name, :address, :age, :company_id, :department_id, :password, :login, :passport_number, :phone_number, :position, :creation_date, :roles)
-</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'first_name': payload.firstName, 
-	'last_name': payload.lastName, 
-	'address': payload.address, 
-	'age': payload.age, 
-	'company_id': payload.companyId, 
-	'department_id': payload.departmentId, 
-	'password': payload.password, 
-	'login': payload.login, 
-	'passport_number': payload.passportNumber, 
-	'phone_number': payload.phoneNumber, 
-	'position': payload.position, 
-	'creation_date': payload.creationDate, 
-	'roles': payload.roles
-}]]]></db:input-parameters>
-		</db:insert>
-		<set-payload value="#['Employee ' ++ vars.employeeName ++ ' was created successfully']" doc:name="Set Payload" doc:id="c88096fe-599d-4ed3-8cf0-5e1b15d99a56" />
-	</flow>
-	<flow name="getEmployeeById_Flow" doc:id="58f247a2-2090-4bef-bc13-99877e137aaf" >
-		<flow-ref doc:name="setEmployeeId_Subflow" doc:id="7bcc2df4-943d-478a-a812-7e5c5a986a50" name="setEmployeeId_Subflow"/>
-		<db:select doc:name="Select" doc:id="3491f1d1-b0f3-4790-8c5b-290507cb6135" config-ref="Database_Config">
-			<db:sql >SELECT *
-FROM employee
-WHERE id =:id</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'id': vars.employeeId
-}]]]></db:input-parameters>
-		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="c1ebaa16-2f29-4100-a249-e46270d1797a" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{
-	id: payload.id[0],
-	firstName: payload.first_name[0],
-	lastName: payload.last_name[0],
-	age: payload.age[0],
-	passportNumber: payload.passport_number[0],
-	phoneNumber: payload.phone_number[0],
-	address: payload.address[0],
-	companyId: payload.company_id[0],
-	departmentId: payload.department_id[0],
-	position: payload.position[0],
-	login: payload.login[0],
-	password: payload.password[0],
-	roles: payload.roles[0],
-	creationDate: payload.creation_date[0] as String
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-	</flow>
-	<flow name="putEmployeeById_Flow" doc:id="bda3331e-8ca0-43a8-a06b-f96374d5709d" >
-		<flow-ref doc:name="setEmployeeId_Subflow" doc:id="ac7e8df4-bdff-424d-b342-1d9b89ebf3d0" name="setEmployeeId_Subflow"/>
-		<ee:transform doc:name="Transform Message" doc:id="06458473-df22-4238-8216-5708ac3c2288">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-	firstName: payload.firstName,
-	lastName: payload.lastName,
-	age: payload.age,
-	passportNumber: payload.passportNumber,
-	phoneNumber: payload.phoneNumber,
-	address: payload.address,
-	companyId: payload.companyId,
-	departmentId: payload.departmentId,
-	position: payload.position,
-	login: payload.login,
-	password: payload.password,
-	roles: payload.roles
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<flow-ref doc:name="setEmployeeName_Subflow" doc:id="055b2c42-c780-45ee-a34b-96fda033d4e8" name="setEmployeeName_Subflow"/>
-		<db:update doc:name="Update" doc:id="e89a9053-c93b-402c-bcd2-9cb2c673d706" config-ref="Database_Config">
-			<db:sql >UPDATE employee SET first_name = :firstName, last_name = :lastName, age = :age, passport_number = :passportNumber, phone_number = :phoneNumber, address = :address, company_id = :companyId, 
-department_id = :departmentId, position = :position, login = :login, password = :password, roles = :roles WHERE id = :id</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'firstName': payload.firstName,
-	'lastName': payload.lastName,
-	'age': payload.age, 
-	'passportNumber': payload.passportNumber, 
-	'phoneNumber': payload.phoneNumber,
-	'address': payload.address,
-	'companyId': payload.companyId,
-	'departmentId': payload.departmentId, 
-	'position': payload.position,
-	'login': payload.login,
-	'password': payload.password,
-	'roles': payload.roles,
-	'id': vars.employeeId
-}]]]></db:input-parameters>
-		</db:update>
-		<set-payload value="#['Employee ' ++ vars.employeeName ++ ' was modified successfully']" doc:name="Set Payload" doc:id="0e052f0f-7373-477f-a6f0-c7fae68d513d" />
-	</flow>
-	<flow name="deleteEmployeeById_Flow" doc:id="8f491c0e-d674-4d9e-89d3-6da667a12c88">
-		<flow-ref doc:name="setEmployeeId_Subflow" doc:id="5119e8f8-db77-470d-a9cd-86fadbbf9e70" name="setEmployeeId_Subflow"/>
-		<flow-ref doc:name="setHttpStatusTo200_Subflow" doc:id="4031e6f9-17a1-446c-8e27-78f73a47f981" name="setHttpStatusTo200_Subflow"/>
-		<db:select doc:name="Select" doc:id="f44a986a-7a39-4ca9-bebb-e9ffdf4e8c67" config-ref="Database_Config">
-			<db:sql>SELECT *  
-FROM employee
-WHERE id = :id</db:sql>
-			<db:input-parameters><![CDATA[#[{
-	'id': vars.employeeId
-}]]]></db:input-parameters>
-		</db:select>
-		<set-variable value="#[payload[0].first_name ++ ' ' ++ payload[0].last_name]" doc:name="employeeName" doc:id="bca0bad2-46eb-4cf0-af8c-b53d4d01090b" variableName="employeeName"/>
-		<db:delete doc:name="Delete" doc:id="5e06458e-db76-4e8e-95dc-5f59261fd349" config-ref="Database_Config">
-			<db:sql>DELETE FROM employee
-WHERE id = :id</db:sql>
-			<db:input-parameters><![CDATA[#[{
-	'id': vars.employeeId
-}]]]></db:input-parameters>
-		</db:delete>
-		<set-payload value="#['Employee ' ++ vars.employeeName ++ ' was deleted successfully']" doc:name="Set Payload" doc:id="a310323c-ecc4-4ee6-b2b6-f6c3c8f0275f" />
-	</flow>
-	<flow name="getEmployeeByCompanyId_Flow" doc:id="cb66231b-638e-4ec0-b379-814e25a52af6" >
-		<flow-ref doc:name="setCompanyId_Subflow" doc:id="6fd8ac69-d753-4287-8e54-8407f8070e97" name="setCompanyId_Subflow"/>
-		<db:select doc:name="Select" doc:id="f9c54509-0da1-448c-bacd-c70057c42493" config-ref="Database_Config">
-			<db:sql >SELECT *
-FROM employee
-WHERE company_id = :id</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'id': vars.companyId
-}]]]></db:input-parameters>
-		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="420fc432-f32a-4199-bffe-03a4e4e45bcf" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-payload map ( payload01 , indexOfPayload01 ) -> {
-	id: payload01.id,
-	firstName: payload01.first_name,
-	lastName: payload01.last_name,
-	companyId: payload01.company_id,
-	departmentId: payload01.department_id,
-	position: payload01.position
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-	</flow>
-	<flow name="postEmployeeByCompanyId_Flow" doc:id="de7b5a7d-fe41-4261-9f4d-4d5b98736127" >
-		<flow-ref doc:name="setCompanyId_Subflow" doc:id="004f53b2-1e24-4f8d-b9ab-a930872723ed" name="setCompanyId_Subflow"/>
-		<ee:transform doc:name="Transform Message" doc:id="40fd3e58-c1b3-47e9-ae3c-f2d349beaf21" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{
-	firstName: payload.firstName,
-	lastName: payload.lastName,
-	age: payload.age,
-	passportNumber: payload.passportNumber,
-	phoneNumber: payload.phoneNumber,
-	address: payload.address,
-	companyId: vars.companyId,
-	departmentId: payload.departmentId,
-	position: payload.position,
-	login: payload.login,
-	password: payload.password,
-	roles: payload.roles,
-	creationDate: now() as Date
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<flow-ref doc:name="setEmployeeName_Subflow" doc:id="94a0c41f-5934-4fde-bb6c-c9353d2514b4" name="setEmployeeName_Subflow"/>
-		<db:insert doc:name="Insert" doc:id="efa42a8a-03f0-47f0-a23c-abde697ca5c9" config-ref="Database_Config">
-			<db:sql >INSERT INTO employee(first_name, last_name, address, age, company_id, department_id, password, login, passport_number, phone_number, position, creation_date, roles)
-VALUES(:first_name, :last_name, :address, :age, :company_id, :department_id, :password, :login, :passport_number, :phone_number, :position, :creation_date, :roles)
-</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'first_name': payload.firstName, 
-	'last_name': payload.lastName, 
-	'address': payload.address, 
-	'age': payload.age, 
-	'company_id': vars.companyId, 
-	'department_id': payload.departmentId, 
-	'password': payload.password, 
-	'login': payload.login, 
-	'passport_number': payload.passportNumber, 
-	'phone_number': payload.phoneNumber, 
-	'position': payload.position, 
-	'creation_date': payload.creationDate, 
-	'roles': payload.roles
-}]]]></db:input-parameters>
-		</db:insert>
-		<set-payload value="#['Employee ' ++ vars.employeeName ++ ' was created successfully']" doc:name="Set Payload" doc:id="279f5c9d-de8d-441e-a600-5b588b6371b9" />
-	</flow>
-	<flow name="getEmployeesByDepartmentId_Flow" doc:id="e2acdc4f-0a61-4f9c-9a02-1be2c08cad67" >
-		<flow-ref doc:name="setDepartmentId_Subflow" doc:id="d84a71dc-3735-4afe-bd29-c371007664f0" name="setDepartmentId_Subflow"/>
-		<db:select doc:name="Select" doc:id="0a8ab3fc-c26d-4684-81ae-6ba235abacb2" config-ref="Database_Config">
-			<db:sql >SELECT * 
-FROM employee 
-WHERE department_id = :id</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'id': vars.departmentId
-}]]]></db:input-parameters>
-		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="76da8185-2945-46d2-8fe0-7217c81092bc" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-payload map ( payload01 , indexOfPayload01 ) -> {
-	id: payload01.id,
-	firstName: payload01.first_name,
-	lastName: payload01.last_name,
-	companyId: payload01.company_id,
-	departmentId: payload01.department_id,
-	position: payload01.position
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-	</flow>
-	<flow name="postEmployeeByDepartmentId_Flow" doc:id="30af0867-e7fb-4812-86c0-0b1bb8f2cb1a" >
-		<flow-ref doc:name="setDepartmentId_Subflow" doc:id="7454eece-dded-4072-b511-cf4b5d7378da" name="setDepartmentId_Subflow"/>
-		<ee:transform doc:name="Transform Message" doc:id="b6cfe562-1daa-4671-96c5-e87bcf2ed13f" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
----
-{
-	firstName: payload.firstName,
-	lastName: payload.lastName,
-	age: payload.age,
-	passportNumber: payload.passportNumber,
-	phoneNumber: payload.phoneNumber,
-	address: payload.address,
-	companyId: payload.companyId,
-	departmentId: vars.departmentId,
-	position: payload.position,
-	login: payload.login,
-	password: payload.password,
-	roles: payload.roles,
-	creationDate: now() as Date
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<flow-ref doc:name="setEmployeeName_Subflow" doc:id="ee69bba4-bdb5-419c-8559-4613917ede1a" name="setEmployeeName_Subflow"/>
-		<db:insert doc:name="Insert" doc:id="4159cb1f-c617-442c-a766-34ab3a1d1058" config-ref="Database_Config">
-			<db:sql >INSERT INTO employee(first_name, last_name, address, age, company_id, department_id, password, login, passport_number, phone_number, position, creation_date, roles)
-VALUES(:first_name, :last_name, :address, :age, :company_id, :department_id, :password, :login, :passport_number, :phone_number, :position, :creation_date, :roles)
-</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'first_name': payload.firstName, 
-	'last_name': payload.lastName, 
-	'address': payload.address, 
-	'age': payload.age, 
-	'company_id': payload.companyId, 
-	'department_id': vars.departmentId, 
-	'password': payload.password, 
-	'login': payload.login, 
-	'passport_number': payload.passportNumber, 
-	'phone_number': payload.phoneNumber, 
-	'position': payload.position, 
-	'creation_date': payload.creationDate, 
-	'roles': payload.roles
-}]]]></db:input-parameters>
-		</db:insert>
-		<set-payload value="#['Employee ' ++ vars.employeeName ++ ' was created successfully']" doc:name="Set Payload" doc:id="e9bac012-d086-4c35-9124-98a6d99ef323" />
 	</flow>
 	<flow name="getVacations_Flow" doc:id="645dc5bb-4ee4-478a-a22f-49ac14a0d1c6" >
 		<db:select doc:name="Select" doc:id="1f9618dd-deba-49bd-a086-2425f9507620" config-ref="Database_Config">
@@ -677,331 +1323,54 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 			</ee:message>
 		</ee:transform>
 	</flow>
-	<flow name="postVacations_Flow" doc:id="9f2e88af-1144-465d-9eb9-493509103433" >
-		<ee:transform doc:name="Transform Message" doc:id="51e53dc1-7669-40d0-98e8-d89ac4681123" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
----
-{
-	employeeId: payload.employeeId,
-	companyId: payload.companyId,
-	departmentId: payload.departmentId,
-	startDate: payload.startDate,
-	periodOfDays: payload.periodOfDays,
-	status: 'In process',
-	creationDate: now() as Date
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<db:insert doc:name="Insert" doc:id="8969e2dd-6a60-45fa-8231-6b9dad58b381" config-ref="Database_Config">
-			<db:sql >INSERT INTO vacation(company_id, creation_date, department_id, employee_id, period_of_days, start_vacation_date, status)
-VALUES(:company_id, :creation_date, :department_id, :employee_id, :period_of_days, :start_vacation_date, :status)</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'company_id': payload.companyId, 
-	'creation_date': payload.creationDate, 
-	'department_id': payload.departmentId, 
-	'employee_id': payload.employeeId, 
-	'period_of_days': payload.periodOfDays, 
-	'start_vacation_date': payload.startDate, 
-	'status': payload.status
-}]]]></db:input-parameters>
-		</db:insert>
-		<set-payload value="Vacation was created successfully" doc:name="Set Payload" doc:id="50ea978f-f4b5-427c-90ff-a9c367d8b51e" />
-	</flow>
-	<flow name="getVacationById_Flow" doc:id="905879ad-b574-4900-b02d-035b6834ee98" >
-		<flow-ref doc:name="setVacationId_Subflow" doc:id="d57318b6-3e3e-4b0c-b45a-f96b95578aaa" name="setVacationId_Subflow"/>
-		<db:select doc:name="Select" doc:id="8fa44084-93c5-4d33-b933-686fb15cdf0c" config-ref="Database_Config">
-			<db:sql >SELECT * 
-FROM vacation
-WHERE id = :id</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'id': vars.vacationId
-}]]]></db:input-parameters>
-		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="40c2b953-88b7-4c5a-94dc-fd66bba7abe4" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{
-	id: payload.id[0],
-	employeeId: payload.employee_id[0],
-	companyId: payload.company_id[0],
-	departmentId: payload.department_id[0],
-	startDate: payload.start_vacation_date[0],
-	periodOfDays: payload.period_of_days[0],
-	status: payload.status[0],
-	creationDate: payload.creation_date[0] as String
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-	</flow>
-	<flow name="putVacationById_Flow" doc:id="ca12c30e-8076-496f-b844-82d92918a42c">
-	<flow-ref doc:name="setVacationId_Subflow" doc:id="2fe04bd8-2f13-43db-9836-5f65e20669d6" name="setVacationId_Subflow"/>
-		<ee:transform doc:name="Transform Message" doc:id="882a1a8c-4747-45ab-90ad-a7848d319b05">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-	employeeId: payload.employeeId,
-	companyId: payload.companyId,
-	departmentId: payload.departmentId,
-	startDate: payload.startDate,
-	periodOfDays: payload.periodOfDays,
-	status: payload.status
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<db:update doc:name="Update" doc:id="955ab818-7a6d-4bc6-b58e-81cf28dabde2" config-ref="Database_Config">
-			<db:sql>UPDATE vacation
-SET
-	company_id = :company_id, 
-	department_id = :department_id, 
-	employee_id = :employee_id, 
-	period_of_days = :period_of_days, 
-	start_vacation_date = :start_vacation_date, 
-	status = :status 
-WHERE id = :id</db:sql>
-			<db:input-parameters><![CDATA[#[{
-	'company_id': payload.companyId, 
-	'department_id': payload.departmentId, 
-	'employee_id': payload.employeeId, 
-	'period_of_days': payload.periodOfDays, 
-	'start_vacation_date': payload.startDate, 
-	'status': payload.status,
-	'id': vars.vacationId 
-}]]]></db:input-parameters>
-		</db:update>
-		<set-payload value="Vacation was modified successfully" doc:name="Set Payload" doc:id="93442c6e-81ee-4410-b346-4e22a576a1e1" />
-	</flow>
-	<flow name="deleteVacationById_Flow" doc:id="c7daf674-ee6c-4105-800f-94ddf30e1050">
-		<flow-ref doc:name="setVacationId_Subflow" doc:id="12d3602d-d23b-41ce-982d-716a6f6730cc" name="setVacationId_Subflow"/>
-		<flow-ref doc:name="setHttpStatusTo200_Subflow" doc:id="e2e5a156-c290-46f4-84f3-2a9bb9da7733" name="setHttpStatusTo200_Subflow"/>
-		<db:delete doc:name="Delete" doc:id="699873f7-1479-427a-9b01-f8be1277f7e3" config-ref="Database_Config">
-			<db:sql>DELETE FROM vacation
-WHERE id = :id</db:sql>
-			<db:input-parameters><![CDATA[#[{
-	'id': vars.vacationId
-}]]]></db:input-parameters>
-		</db:delete>
-		<set-payload value="#['Vacation was deleted successfully']" doc:name="Set Payload" doc:id="29459175-10b9-4330-9e69-3c08b687adba" />
-	</flow>
-	<flow name="getVacationByCompanyId_Flow" doc:id="52d1b3e1-8b21-40fc-9e71-792417442dc8" >
-		<flow-ref doc:name="setCompanyId_Subflow" doc:id="cb63bca6-5a0c-40b4-ab82-76fd4db07578" name="setCompanyId_Subflow"/>
-		<db:select doc:name="Select" doc:id="6b38a7c3-db4b-4c62-a92e-5834114febca" config-ref="Database_Config">
-			<db:sql >SELECT * 
-FROM vacation 
-WHERE company_id = :id</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'id': vars.companyId
-}]]]></db:input-parameters>
-		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="4d0c1f2e-eec0-49fb-9420-86a18e631f00" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-payload map ( payload01 , indexOfPayload01 ) -> {
-	id: payload01.id,
-	employeeId: payload01.employee_id,
-	companyId: payload01.company_id,
-	departmentId: payload01.department_id,
-	startDate: payload01.start_vacation_date,
-	periodOfDays: payload01.period_of_days,
-	status: payload01.status
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-	</flow>
-	<flow name="postVacationByCompanyId_Flow" doc:id="cd4238dd-f49c-48ef-8edb-2be467fa6a76">
-		<flow-ref doc:name="setCompanyId_Subflow" doc:id="8357a163-0cc1-4683-a124-958599327a75" name="setCompanyId_Subflow"/>
-		<ee:transform doc:name="Transform Message" doc:id="2e3f9a0e-93c1-41fe-acc2-f7ae0be28c16">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-	employeeId: payload.employeeId,
-	companyId: vars.companyId,
-	departmentId: payload.departmentId,
-	startDate: payload.startDate,
-	periodOfDays: payload.periodOfDays,
-	status: 'In process',
-	creationDate: now() as Date
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<db:insert doc:name="Insert" doc:id="27edc66e-1440-408b-a383-3c16ddce5766" config-ref="Database_Config">
-			<db:sql>INSERT INTO vacation(company_id, creation_date, department_id, employee_id, period_of_days, start_vacation_date, status)
-VALUES(:company_id, :creation_date, :department_id, :employee_id, :period_of_days, :start_vacation_date, :status)</db:sql>
-			<db:input-parameters><![CDATA[#[{
-	'company_id': vars.companyId, 
-	'creation_date': payload.creationDate, 
-	'department_id': payload.departmentId, 
-	'employee_id': payload.employeeId, 
-	'period_of_days': payload.periodOfDays, 
-	'start_vacation_date': payload.startDate, 
-	'status': payload.status
-}]]]></db:input-parameters>
-		</db:insert>
-		<set-payload value="Vacation was created successfully" doc:name="Set Payload" doc:id="f9534bba-79be-4a13-804d-1f4176bad19a" />
-	</flow>
-	<flow name="getVacationsByDepartmentId_Flow" doc:id="f39bc042-724c-46f7-b0fd-6a0a1f8315cc" >
-		<flow-ref doc:name="setDepartmentId_Subflow" doc:id="9551a454-ca4c-476c-ab84-eeded4f91f4f" name="setDepartmentId_Subflow"/>
-		<db:select doc:name="Select" doc:id="02431586-efd3-4988-922c-417f1e8b372f" config-ref="Database_Config">
-			<db:sql >SELECT * 
-FROM vacation 
-WHERE department_id = :id</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'id': vars.departmentId
-}]]]></db:input-parameters>
-		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="bee26cbb-882e-46a3-8c43-8fa7c39d723d" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-payload map ( payload01 , indexOfPayload01 ) -> {
-	id: payload01.id,
-	employeeId: payload01.employee_id,
-	companyId: payload01.company_id,
-	departmentId: payload01.department_id,
-	startDate: payload01.start_vacation_date,
-	periodOfDays: payload01.period_of_days,
-	status: payload01.status
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-	</flow>
-	<flow name="postVacationByDepartmentId_Flow" doc:id="9534688a-9c1f-4a8c-8c81-323f49c46763" >
-		<flow-ref doc:name="setDepartmentId_Subflow" doc:id="96e6011a-9d99-4e47-acd5-5765f91f0404" name="setDepartmentId_Subflow"/>
-		<ee:transform doc:name="Transform Message" doc:id="b94cd832-11fb-48bd-90c5-ead28eead223" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{
-	employeeId: payload.employeeId,
-	companyId: payload.companyId,
-	departmentId: vars.departmentId,
-	startDate: payload.startDate,
-	periodOfDays: payload.periodOfDays,
-	status: 'In process',
-	creationDate: now() as Date
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<db:insert doc:name="Insert" doc:id="bcf8d85d-9845-41a6-8d87-f7314f8bb2e7" config-ref="Database_Config">
-			<db:sql >INSERT INTO vacation(company_id, creation_date, department_id, employee_id, period_of_days, start_vacation_date, status)
-VALUES(:company_id, :creation_date, :department_id, :employee_id, :period_of_days, :start_vacation_date, :status)</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'company_id': payload.companyId, 
-	'creation_date': payload.creationDate, 
-	'department_id': vars.departmentId, 
-	'employee_id': payload.employeeId, 
-	'period_of_days': payload.periodOfDays, 
-	'start_vacation_date': payload.startDate, 
-	'status': payload.status
-}]]]></db:input-parameters>
-		</db:insert>
-		<set-payload value="Vacation was created successfully" doc:name="Set Payload" doc:id="4654f942-535d-4ff0-9e4a-ae1fff59acec" />
-	</flow>
-	<flow name="getVacationsByEmployeeId_Flow" doc:id="00718558-91f8-4d10-8ce7-8761adde58f0" >
-		<flow-ref doc:name="setEmployeeId_Subflow" doc:id="415e6324-d254-4bc3-8c1e-0c9842e364e5" name="setEmployeeId_Subflow"/>
-		<db:select doc:name="Select" doc:id="886d73e9-7fb5-460a-8044-1bebf1ccc9de" config-ref="Database_Config">
-			<db:sql >SELECT * 
-FROM vacation 
-WHERE employee_id = :id</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'id': vars.employeeId
-}]]]></db:input-parameters>
-		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="f9a673ec-e76e-422c-917a-937814f028d5" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-payload map ( payload01 , indexOfPayload01 ) -> {
-	id: payload01.id,
-	employeeId: payload01.employee_id,
-	companyId: payload01.company_id,
-	departmentId: payload01.department_id,
-	startDate: payload01.start_vacation_date,
-	periodOfDays: payload01.period_of_days,
-	status: payload01.status
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-	</flow>
-	<flow name="postVacationByEmployeeId_Flow" doc:id="fced0a26-a3a6-4cfa-8672-f69f8661fc5d" >
-		<flow-ref doc:name="setEmployeeId_Subflow" doc:id="efb4ae22-b580-44dc-b8d3-8cc7b9d0e6a8" name="setEmployeeId_Subflow"/>
-		<ee:transform doc:name="Transform Message" doc:id="865a5585-4a87-4ff1-b40d-4bec43aac86c" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
----
-{
-	employeeId: vars.employeeId,
-	companyId: payload.companyId,
-	departmentId: payload.departmentId,
-	startDate: payload.startDate,
-	periodOfDays: payload.periodOfDays,
-	status: 'In process',
-	creationDate: now() as Date
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<db:insert doc:name="Insert" doc:id="ac5fdd93-45a4-413d-b4ce-394c91ebadb3" config-ref="Database_Config">
-			<db:sql >INSERT INTO vacation(company_id, creation_date, department_id, employee_id, period_of_days, start_vacation_date, status)
-VALUES(:company_id, :creation_date, :department_id, :employee_id, :period_of_days, :start_vacation_date, :status)</db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	'company_id': payload.companyId, 
-	'creation_date': payload.creationDate, 
-	'department_id': payload.departmentId, 
-	'employee_id': vars.employeeId, 
-	'period_of_days': payload.periodOfDays, 
-	'start_vacation_date': payload.startDate, 
-	'status': payload.status
-}]]]></db:input-parameters>
-		</db:insert>
-		<set-payload value="Vacation was created successfully" doc:name="Set Payload" doc:id="d90f2417-7280-45cd-836c-dc3b3030c0eb" />
-	</flow>
-	<sub-flow name="setCompanyId_Subflow" doc:id="b8b00e03-386a-427f-b510-7f78601bc998" >
+	<sub-flow name="setCompanyId_Sub_Flow" doc:id="b8b00e03-386a-427f-b510-7f78601bc998" >
 		<set-variable value="#[message.attributes.uriParams.company_id]" doc:name="companyId" doc:id="563ea28d-1cf0-408b-a996-2382cc20a32e" variableName="companyId" />
 	</sub-flow>
-	<sub-flow name="setCompanyIdFromPayload_Subflow" doc:id="feae0b7d-fb32-49b9-bf75-100fc9ebbb4a" >
+	<sub-flow name="setCompanyIdFromPayload_Sub_Flow" doc:id="feae0b7d-fb32-49b9-bf75-100fc9ebbb4a" >
 		<set-variable value="#[payload.companyId]" doc:name="companyId" doc:id="7bd4bc4b-894e-4a5c-bf12-648a889d8355" variableName="companyId"/>
 	</sub-flow>
-	<sub-flow name="setDepartmentId_Subflow" doc:id="b9700d72-c927-4588-b0f8-8e2355f9f794" >
+	<sub-flow name="setDepartmentId_Sub_Flow" doc:id="b9700d72-c927-4588-b0f8-8e2355f9f794" >
 		<set-variable value="#[message.attributes.uriParams.department_id]" doc:name="departmentId" doc:id="4dcdf909-f25a-4eb3-ba9f-4860b52111db" variableName="departmentId" />
 	</sub-flow>
-	<sub-flow name="setEmployeeId_Subflow" doc:id="9ac13136-7c68-419b-86cc-e6d36c653276" >
+	<sub-flow name="setEmployeeId_Sub_Flow" doc:id="9ac13136-7c68-419b-86cc-e6d36c653276" >
 		<set-variable value="#[message.attributes.uriParams.employee_id]" doc:name="employeeId" doc:id="5a3e5b2d-01f3-4bc0-83cc-9d2709e6c2d0" variableName="employeeId" />
 	</sub-flow>
-	<sub-flow name="setVacationId_Subflow" doc:id="bcd18d65-f8b6-4a72-a69c-ea6f4ce7a9cb" >
+	<sub-flow name="setVacationId_Sub_Flow" doc:id="bcd18d65-f8b6-4a72-a69c-ea6f4ce7a9cb" >
 		<set-variable value="#[message.attributes.uriParams.vacation_id]" doc:name="vacationId" doc:id="36564768-5de8-4b2d-9a5c-fc043a87d634" variableName="vacationId" />
 	</sub-flow>
-	<sub-flow name="setCompanyName_Subflow" doc:id="b4f4dc86-6ad6-4a08-be8d-69995c741344" >
-		<set-variable value="#[payload.name]" doc:name="companyName" doc:id="30e411ba-0bbc-4c0a-bf59-d6d7d58d41f0" variableName="companyName" />
+	<sub-flow name="setCompanyName_Sub_Flow" doc:id="b4f4dc86-6ad6-4a08-be8d-69995c741344" >
+		<set-variable value="#[payload[0].name]" doc:name="companyName" doc:id="30e411ba-0bbc-4c0a-bf59-d6d7d58d41f0" variableName="companyName" />
 	</sub-flow>
-	<sub-flow name="setDepartmentName_Subflow" doc:id="2fa45384-8e2e-4c2d-8e4d-cefb24cc746c">
-		<set-variable value="#[payload.name]" doc:name="departmentName" doc:id="9d7e403e-4b06-4fb6-b878-e285d90a3f44" variableName="departmentName" />
+	<sub-flow name="setDepartmentName_Sub_Flow" doc:id="2fa45384-8e2e-4c2d-8e4d-cefb24cc746c">
+		<set-variable value="#[payload[0].name]" doc:name="departmentName" doc:id="9d7e403e-4b06-4fb6-b878-e285d90a3f44" variableName="departmentName" />
 	</sub-flow>
-	<sub-flow name="setEmployeeName_Subflow" doc:id="4a242bf7-96f5-48eb-8590-b153c5c94364" >
-		<set-variable value="#[payload.firstName ++ ' ' ++ payload.lastName]" doc:name="employeeName" doc:id="fc0fdceb-a6d1-4604-8137-1c292cd6b454" variableName="employeeName" />
+	<sub-flow name="setEmployeeName_Sub_Flow" doc:id="4a242bf7-96f5-48eb-8590-b153c5c94364" >
+		<set-variable value="#[payload[0].first_name ++ ' ' ++ payload[0].last_name]" doc:name="employeeName" doc:id="fc0fdceb-a6d1-4604-8137-1c292cd6b454" variableName="employeeName" />
 	</sub-flow>
-	<sub-flow name="setDateAndTime_Subflow" doc:id="d49de7d2-091e-45cb-98fd-98b9626f036c" >
+	<sub-flow name="setDateAndTime_Sub_Flow" doc:id="d49de7d2-091e-45cb-98fd-98b9626f036c" >
 		<set-variable value="#[payload.creationDate]" doc:name="dateAndTime" doc:id="c900ba0a-5e51-4abf-bc90-654b163d5979" variableName="dateAndTime"/>
 	</sub-flow>
-	<sub-flow name="setId_Subflow" doc:id="a11cae7a-e576-4d70-9a0f-26d28cada9af">
-		<set-variable value="#[payload[0].id]" doc:name="id" doc:id="bd68eaa1-3f1e-454b-b56b-cceb25923fa2" variableName="id" />
-	</sub-flow>
-	<sub-flow name="setBaseUri_Subflow" doc:id="1302249b-5a48-4b57-9eba-eb7785049555" >
+	<sub-flow name="setBaseUri_Sub_Flow" doc:id="1302249b-5a48-4b57-9eba-eb7785049555" >
 		<set-variable value="#[message.attributes.localAddress ++ message.attributes.requestUri]" doc:name="baseUri" doc:id="07318b60-78c5-42d2-99a0-ce8939fef3b0" variableName="baseUri"/>
 	</sub-flow>
-	<sub-flow name="setHttpStatusTo200_Subflow" doc:id="f022288d-91d8-42ec-8a3c-bb1ca93c866a" >
+	<sub-flow name="setHttpStatusTo200_Sub_Flow" doc:id="f022288d-91d8-42ec-8a3c-bb1ca93c866a" >
 		<set-variable value="200" doc:name="httpStatus" doc:id="0e870d29-e2c8-4a4e-bad8-4ac6ab14e3c5" variableName="httpStatus" />
+	</sub-flow>
+	<sub-flow name="savePayloadToVariable_Sub_Flow" doc:id="c59348bc-40ed-4256-86bd-28457f434761">
+		<set-variable value="#[payload]" doc:name="payloadToVar" doc:id="873996c2-4a20-49e7-ad9c-ee4117c2a34e" variableName="payloadToVar" />
+	</sub-flow>
+	<sub-flow name="setOutboundHeaderCreatedObjectUrl_Sub_Flow" doc:id="af2ee91a-a13d-4e3e-b668-b5b6343237d4">
+		<ee:transform doc:name="Transform Message" doc:id="a24a09fc-589d-4cd7-a017-3dd0ab7d0f3b">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="outboundHeaders"><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"created_item_url": ('http:/' ++ vars.baseUri ++ "/" ++ payload[0].id)
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
 	</sub-flow>
 </mule>

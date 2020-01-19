@@ -12,6 +12,17 @@
     "a24a09fc-589d-4cd7-a017-3dd0ab7d0f3b": {
       "vars-baseUri": "sample_data/defaultstringtype.dwl"
     },
-    "e22ce889-b068-41b2-95dd-2331620f884e": {}
+    "e22ce889-b068-41b2-95dd-2331620f884e": {},
+    "3fc79d90-cb91-4a92-b03c-3d9f58df78fc": {
+      "payload": "sample_data/json.json"
+    },
+    "9afbed7d-f247-42ad-8753-92a210217980": {
+      "payload": "sample_data/unknown.json"
+    },
+    "a8e1cc18-8733-4c0a-af96-1f49394572d4": {},
+    "75fbbd66-de28-43dd-bb1b-018fd0ebdbd8": {
+      "payload": "sample_data/unknown_1.dwl"
+    },
+    "8a156faa-5fec-4483-9742-1d3f420b0dbe": {}
   }
 }
